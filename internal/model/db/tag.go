@@ -1,0 +1,12 @@
+package model
+
+import "gorm.io/gorm"
+
+// Tag 标签
+type Tag struct {
+	gorm.Model
+	Name string `gorm:"uniqueIndex;not null" json:"name"` // 标签名唯一
+
+	// 反向关联
+	Items []Item `gorm:"many2many:item_tags;"` // 使用该标签的藏品
+}
