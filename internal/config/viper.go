@@ -33,7 +33,7 @@ var defaultConfig = Config{
 
 var config *Config
 
-func InitConfig() error {
+func InitConfig() (*Config, error) {
 	viper.SetConfigName("config")            // 读取名为config的配置文件，没有设置特定的文件后缀名
 	viper.SetConfigType("yaml")              // 当没有设置特定的文件后缀名时，必须要指定文件类型
 	viper.AddConfigPath("./")                // 在当前文件夹下寻找
@@ -45,15 +45,15 @@ func InitConfig() error {
 			// 使用默认配置
 			setDefaultFromStruct(defaultConfig)
 		} else {
-			return fmt.Errorf("fatal error config file: %w", err)
+			return nil, fmt.Errorf("fatal error config file: %w", err)
 		}
 	}
 
 	if err := viper.Unmarshal(&config); err != nil {
-		return fmt.Errorf("unable to decode into struct, %v", err)
+		return nil, fmt.Errorf("unable to decode into struct, %v", err)
 	}
 
-	return nil
+	return config, nil
 }
 
 func GetConfig() *Config {
