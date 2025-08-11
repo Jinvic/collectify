@@ -11,3 +11,7 @@ type Collection struct {
 	// 关联的藏品
 	Items []Item `gorm:"many2many:collection_items;" json:"items"` // 包含的藏品（可跨类型）
 }
+
+func (c Collection) TableName() string {
+	return "collections"
+}

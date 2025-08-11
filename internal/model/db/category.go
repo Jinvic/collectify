@@ -11,3 +11,7 @@ type Category struct {
 	Items  []Item  `gorm:"foreignKey:CategoryID"` // 使用该类别的藏品
 	Fields []Field `gorm:"foreignKey:CategoryID"` // 类别包含的字段
 }
+
+func (c Category) TableName() string {
+	return "categories"
+}

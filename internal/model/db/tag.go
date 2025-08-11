@@ -10,3 +10,7 @@ type Tag struct {
 	// 反向关联
 	Items []Item `gorm:"many2many:item_tags;"` // 使用该标签的藏品
 }
+
+func (t Tag) TableName() string {
+	return "tags"
+}

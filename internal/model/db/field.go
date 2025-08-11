@@ -19,3 +19,7 @@ type Field struct {
 	IsArray    bool   `gorm:"default:false"`
 	Required   bool
 }
+
+func (f Field) TableName() string {
+	return "fields"
+}

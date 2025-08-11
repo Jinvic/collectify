@@ -18,3 +18,7 @@ type Item struct {
 	Tags        []Tag        `gorm:"many2many:item_tags;" json:"tags"`               // 多个标签
 	Collections []Collection `gorm:"many2many:collection_items;" json:"collections"` // 所属的收藏夹
 }
+
+func (i Item) TableName() string {
+	return "items"
+}
