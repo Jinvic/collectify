@@ -7,11 +7,17 @@ import (
 )
 
 func AddTagToItem(tx *gorm.DB, itemID uint, tagID uint) error {
-	return tx.Model(&model.Item{}).Where("id = ?", itemID).Association("Tags").Append(&model.Tag{Model: gorm.Model{ID: tagID}})
+	return tx.Model(&model.Item{}).
+		Where("id = ?", itemID).
+		Association("Tags").
+		Append(&model.Tag{Model: gorm.Model{ID: tagID}})
 }
 
 func RemoveTagFromItem(tx *gorm.DB, itemID uint, tagID uint) error {
-	return tx.Model(&model.Item{}).Where("id = ?", itemID).Association("Tags").Delete(&model.Tag{Model: gorm.Model{ID: tagID}})
+	return tx.Model(&model.Item{}).
+		Where("id = ?", itemID).
+		Association("Tags").
+		Delete(&model.Tag{Model: gorm.Model{ID: tagID}})
 }
 
 func GetItemTags(tx *gorm.DB, itemID uint) ([]model.Tag, error) {

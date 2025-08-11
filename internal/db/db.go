@@ -25,14 +25,14 @@ func InitDB(cfg *config.Config) error {
 		return fmt.Errorf("unsupported database type: %s", cfg.Database.Type)
 	}
 
-	db.AutoMigrate(
+	err := db.AutoMigrate(
 		&model.Category{},
 		&model.Collection{},
 		&model.Field{},
 		&model.Item{},
 		&model.Tag{},
 	)
-	return nil
+	return err
 }
 
 func GetDB() *gorm.DB {

@@ -7,11 +7,17 @@ import (
 )
 
 func AddItemToCollection(tx *gorm.DB, collectionID uint, itemID uint) error {
-	return tx.Model(&model.Collection{}).Where("id = ?", collectionID).Association("Items").Append(&model.Item{Model: gorm.Model{ID: itemID}})
+	return tx.Model(&model.Collection{}).
+		Where("id = ?", collectionID).
+		Association("Items").
+		Append(&model.Item{Model: gorm.Model{ID: itemID}})
 }
 
 func RemoveItemFromCollection(tx *gorm.DB, collectionID uint, itemID uint) error {
-	return tx.Model(&model.Collection{}).Where("id = ?", collectionID).Association("Items").Delete(&model.Item{Model: gorm.Model{ID: itemID}})
+	return tx.Model(&model.Collection{}).
+		Where("id = ?", collectionID).
+		Association("Items").
+		Delete(&model.Item{Model: gorm.Model{ID: itemID}})
 }
 
 func GetCollectionItems(tx *gorm.DB, collectionID uint) ([]model.Item, error) {

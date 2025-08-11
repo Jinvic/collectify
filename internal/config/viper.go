@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -41,7 +42,7 @@ func InitConfig() (*Config, error) {
 
 	if err := viper.ReadInConfig(); err != nil {
 		// 如果配置文件不存在或无法读取，则加载默认配置
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		if errors.As(err, &viper.ConfigFileNotFoundError{}) {
 			// 使用默认配置
 			setDefaultFromStruct(defaultConfig)
 		} else {
@@ -50,7 +51,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	if err := viper.Unmarshal(&config); err != nil {
-		return nil, fmt.Errorf("unable to decode into struct, %v", err)
+		return nil, fmt.Errorf("unable to decode into struct, %w", err)
 	}
 
 	return config, nil
