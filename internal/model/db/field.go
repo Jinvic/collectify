@@ -23,3 +23,11 @@ type Field struct {
 func (f Field) TableName() string {
 	return "fields"
 }
+
+func (f Field) GetID() uint {
+	return f.Model.ID
+}
+
+func (f Field) IsDeleted() bool {
+	return f.Model.DeletedAt.Valid
+}

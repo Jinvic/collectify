@@ -19,7 +19,8 @@ type ConfigDatabase struct {
 }
 
 type ConfigServer struct {
-	Port int `mapstructure:"port"`
+	Port int    `mapstructure:"port"`
+	Mode string `mapstructure:"mode"`
 }
 
 var defaultConfig = Config{
@@ -29,6 +30,7 @@ var defaultConfig = Config{
 	},
 	Server: ConfigServer{
 		Port: 8080,
+		Mode: "release",
 	},
 }
 

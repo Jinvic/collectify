@@ -22,3 +22,11 @@ type Item struct {
 func (i Item) TableName() string {
 	return "items"
 }
+
+func (i Item) GetID() uint {
+	return i.Model.ID
+}
+
+func (i Item) IsDeleted() bool {
+	return i.Model.DeletedAt.Valid
+}

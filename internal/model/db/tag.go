@@ -14,3 +14,11 @@ type Tag struct {
 func (t Tag) TableName() string {
 	return "tags"
 }
+
+func (t Tag) GetID() uint {
+	return t.Model.ID
+}
+
+func (t Tag) IsDeleted() bool {
+	return t.Model.DeletedAt.Valid
+}

@@ -15,3 +15,11 @@ type Category struct {
 func (c Category) TableName() string {
 	return "categories"
 }
+
+func (c Category) GetID() uint {
+	return c.Model.ID
+}
+
+func (c Category) IsDeleted() bool {
+	return c.Model.DeletedAt.Valid
+}

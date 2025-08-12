@@ -15,3 +15,11 @@ type Collection struct {
 func (c Collection) TableName() string {
 	return "collections"
 }
+
+func (c Collection) GetID() uint {
+	return c.Model.ID
+}
+
+func (c Collection) IsDeleted() bool {
+	return c.Model.DeletedAt.Valid
+}
