@@ -10,6 +10,7 @@ func InitRouter() *gin.Engine {
 	router := gin.Default()
 
 	initCategoryRouter(router)
+	initFieldRouter(router)
 
 	initDeletedRouter(router)
 
@@ -32,5 +33,13 @@ func initDeletedRouter(router *gin.Engine) {
 	{
 		deleted.POST("", handler.Restore)
 		deleted.DELETE("", handler.HardDelete)
+	}
+}
+
+func initFieldRouter(router *gin.Engine) {
+	field := router.Group("/field")
+	{
+		field.POST("", handler.CreateField)
+		field.DELETE("/:id", handler.DeleteField)
 	}
 }

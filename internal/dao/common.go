@@ -54,9 +54,13 @@ func HardDelete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interfac
 	return tx.Unscoped().Model(&t).Where(uniqueFields).Delete(&t).Error
 }
 
-func Get[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) (T, error) {
+func Get[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, preloads ...string) (T, error) {
 	var t T
-	return t, tx.Model(&t).Where(uniqueFields).First(&t).Error
+	query := tx.Model(&t).Where(uniqueFields)
+	for _, preload := range preloads {
+		query = query.Preload(preload)
+	}
+	return t, query.First(&t).Error
 }
 
 func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, p common.Pagination) ([]T, int64, error) {

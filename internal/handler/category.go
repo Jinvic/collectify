@@ -129,7 +129,9 @@ func GetCategory(c *gin.Context) {
 		return
 	}
 
-	category, err := dao.Get[model.Category](db.GetDB(), map[string]interface{}{"id": id})
+	uniqueFields := map[string]interface{}{"id": id}
+	preloads := []string{model.Field{}.TableName()}
+	category, err := dao.Get[model.Category](db.GetDB(), uniqueFields, preloads...)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			Fail(c, e.ErrNotFound)

@@ -23,3 +23,11 @@ type CreateCategoryReq struct {
 type RenameCategoryReq struct {
 	Name string `json:"name" form:"name" binding:"required"`
 }
+
+type CreateFieldReq struct {
+	CategoryID uint   `json:"category_id" form:"category_id" binding:"required,gt=0"`
+	Name       string `json:"name" form:"name" binding:"required"`
+	Type       int    `json:"type" form:"type" binding:"required,oneof=1 2 3 4"`
+	IsArray    bool   `json:"is_array" form:"is_array" binding:"required"`
+	Required   bool   `json:"required" form:"required" binding:"required"`
+}
