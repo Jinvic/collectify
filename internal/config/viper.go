@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Database ConfigDatabase `mapstructure:"database"`
-	Server   ConfigServer   `mapstructure:"server"`
+	Database   ConfigDatabase   `mapstructure:"database"`
+	Server     ConfigServer     `mapstructure:"server"`
+	RecycleBin ConfigRecycleBin `mapstructure:"recycle_bin"`
 }
 
 type ConfigDatabase struct {
@@ -23,6 +24,10 @@ type ConfigServer struct {
 	Mode string `mapstructure:"mode"`
 }
 
+type ConfigRecycleBin struct {
+	Enable bool `mapstructure:"enable"`
+}
+
 var defaultConfig = Config{
 	Database: ConfigDatabase{
 		Type: "sqlite",
@@ -31,6 +36,9 @@ var defaultConfig = Config{
 	Server: ConfigServer{
 		Port: 8080,
 		Mode: "release",
+	},
+	RecycleBin: ConfigRecycleBin{
+		Enable: true,
 	},
 }
 

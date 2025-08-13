@@ -59,3 +59,30 @@ func SoftDelete(typ string, uniqueFields map[string]interface{}) error {
 	}
 	return fn(db, uniqueFields)
 }
+
+func ClearRecycleBin() error {
+	db := db.GetDB()
+
+	err := db.Unscoped().Model(&model.Category{}).Where("deleted_at is not null").Delete(&model.Category{}).Error
+	if err != nil {
+		return err
+	}
+	err = db.Unscoped().Model(&model.Collection{}).Where("deleted_at is not null").Delete(&model.Collection{}).Error
+	if err != nil {
+		return err
+	}
+	err = db.Unscoped().Model(&model.Field{}).Where("deleted_at is not null").Delete(&model.Field{}).Error
+	if err != nil {
+		return err
+	}
+	err = db.Unscoped().Model(&model.Item{}).Where("deleted_at is not null").Delete(&model.Item{}).Error
+	if err != nil {
+		return err
+	}
+	err = db.Unscoped().Model(&model.Tag{}).Where("deleted_at is not null").Delete(&model.Tag{}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
