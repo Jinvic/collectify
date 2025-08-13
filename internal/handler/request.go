@@ -6,8 +6,8 @@ type DeletedReq struct {
 
 type SearchReq struct {
 	NoPaging bool                   `json:"no_paging" form:"no_paging"` // 是否禁用分页
-	Page     int                    `json:"page" form:"page" binding:"required,gt=0"`
-	PageSize int                    `json:"page_size" form:"page_size" binding:"required,gt=0"`
+	Page     int                    `json:"page" form:"page"`
+	PageSize int                    `json:"page_size" form:"page_size"`
 	Filters  map[string]interface{} `json:"filters" form:"filters"`
 }
 
