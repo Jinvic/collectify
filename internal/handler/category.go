@@ -35,7 +35,7 @@ func CreateCategory(c *gin.Context) {
 	category := &model.Category{
 		Name: req.Name,
 	}
-	_, err = dao.Create[model.Category](db.GetDB(), category)
+	_, err = dao.Create(db.GetDB(), category)
 	if err != nil {
 		Fail(c, err)
 		return

@@ -17,9 +17,9 @@ func (c Category) TableName() string {
 }
 
 func (c Category) GetID() uint {
-	return c.Model.ID
+	return c.ID
 }
 
 func (c Category) IsDeleted() bool {
-	return c.Model.DeletedAt.Valid
+	return c.DeletedAt.Valid
 }

@@ -16,9 +16,9 @@ func (t Tag) TableName() string {
 }
 
 func (t Tag) GetID() uint {
-	return t.Model.ID
+	return t.ID
 }
 
 func (t Tag) IsDeleted() bool {
-	return t.Model.DeletedAt.Valid
+	return t.DeletedAt.Valid
 }

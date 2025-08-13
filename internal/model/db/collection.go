@@ -17,9 +17,9 @@ func (c Collection) TableName() string {
 }
 
 func (c Collection) GetID() uint {
-	return c.Model.ID
+	return c.ID
 }
 
 func (c Collection) IsDeleted() bool {
-	return c.Model.DeletedAt.Valid
+	return c.DeletedAt.Valid
 }

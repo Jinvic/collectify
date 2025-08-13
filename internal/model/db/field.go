@@ -25,9 +25,9 @@ func (f Field) TableName() string {
 }
 
 func (f Field) GetID() uint {
-	return f.Model.ID
+	return f.ID
 }
 
 func (f Field) IsDeleted() bool {
-	return f.Model.DeletedAt.Valid
+	return f.DeletedAt.Valid
 }
