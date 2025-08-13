@@ -25,6 +25,14 @@ var hardDeleteFuncs = map[string]func(tx *gorm.DB, uniqueFields map[string]inter
 	model.ModelTypeTag:        dao.HardDelete[model.Tag],
 }
 
+var softDeleteFuncs = map[string]func(tx *gorm.DB, uniqueFields map[string]interface{}) error{
+	model.ModelTypeCategory:   dao.SoftDelete[model.Category],
+	model.ModelTypeCollection: dao.SoftDelete[model.Collection],
+	model.ModelTypeField:      dao.SoftDelete[model.Field],
+	model.ModelTypeItem:       dao.SoftDelete[model.Item],
+	model.ModelTypeTag:        dao.SoftDelete[model.Tag],
+}
+
 func Restore(typ string, uniqueFields map[string]interface{}) error {
 	db := db.GetDB()
 	fn, ok := restoreFuncs[typ]
@@ -37,6 +45,15 @@ func Restore(typ string, uniqueFields map[string]interface{}) error {
 func HardDelete(typ string, uniqueFields map[string]interface{}) error {
 	db := db.GetDB()
 	fn, ok := hardDeleteFuncs[typ]
+	if !ok {
+		return e.ErrInvalidParams
+	}
+	return fn(db, uniqueFields)
+}
+
+func SoftDelete(typ string, uniqueFields map[string]interface{}) error {
+	db := db.GetDB()
+	fn, ok := softDeleteFuncs[typ]
 	if !ok {
 		return e.ErrInvalidParams
 	}

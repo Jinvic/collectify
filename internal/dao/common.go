@@ -66,3 +66,8 @@ func GetList[T model.GormModel](tx *gorm.DB, filters map[string]interface{}, p c
 	}
 	return t, total, nil
 }
+
+func Update[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, updateFields map[string]interface{}) error {
+	var t T
+	return tx.Model(&t).Where(uniqueFields).Updates(updateFields).Error
+}

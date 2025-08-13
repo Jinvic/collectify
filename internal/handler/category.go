@@ -5,6 +5,7 @@ import (
 	"collectify/internal/db"
 	model "collectify/internal/model/db"
 	"collectify/internal/pkg/e"
+	"collectify/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +36,54 @@ func CreateCategory(c *gin.Context) {
 		Name: req.Name,
 	}
 	_, err = dao.Create[model.Category](db.GetDB(), category)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func DeleteCategory(c *gin.Context) {
+	var req IDReq
+	if err := c.ShouldBind(&req); err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err := service.SoftDelete(model.ModelTypeCategory, map[string]interface{}{"id": req.ID})
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func RenameCategory(c *gin.Context) {
+	var req RenameCategoryReq
+	if err := c.ShouldBind(&req); err != nil {
+		Fail(c, err)
+		return
+	}
+
+	// 检查是否重复
+	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), map[string]interface{}{"name": req.Name})
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+	if id != 0 {
+		FailWithData(c, e.ErrDuplicated, map[string]interface{}{
+			"id":        id,
+			"isDeleted": isDeleted,
+		})
+		return
+	}
+
+	uniqueFields := map[string]interface{}{"id": req.ID}
+	updateFields := map[string]interface{}{"name": req.Name}
+	err = dao.Update[model.Category](db.GetDB(), uniqueFields, updateFields)
 	if err != nil {
 		Fail(c, err)
 		return
