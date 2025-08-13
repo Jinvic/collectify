@@ -45,13 +45,13 @@ func CreateCategory(c *gin.Context) {
 }
 
 func DeleteCategory(c *gin.Context) {
-	var req IDReq
-	if err := c.ShouldBind(&req); err != nil {
+	id, err := GetID(c, "id")
+	if err != nil {
 		Fail(c, err)
 		return
 	}
 
-	err := service.SoftDelete(model.ModelTypeCategory, map[string]interface{}{"id": req.ID})
+	err = service.SoftDelete(model.ModelTypeCategory, map[string]interface{}{"id": id})
 	if err != nil {
 		Fail(c, err)
 		return
@@ -61,6 +61,12 @@ func DeleteCategory(c *gin.Context) {
 }
 
 func RenameCategory(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
 	var req RenameCategoryReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
@@ -68,7 +74,10 @@ func RenameCategory(c *gin.Context) {
 	}
 
 	// 检查是否重复
-	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), map[string]interface{}{"name": req.Name})
+	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), map[string]interface{}{
+		"name":    req.Name,
+		"id != ?": id,
+	})
 	if err != nil {
 		Fail(c, err)
 		return
@@ -81,7 +90,7 @@ func RenameCategory(c *gin.Context) {
 		return
 	}
 
-	uniqueFields := map[string]interface{}{"id": req.ID}
+	uniqueFields := map[string]interface{}{"id": id}
 	updateFields := map[string]interface{}{"name": req.Name}
 	err = dao.Update[model.Category](db.GetDB(), uniqueFields, updateFields)
 	if err != nil {

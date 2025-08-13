@@ -18,5 +18,7 @@ func initCategoryRouter(router *gin.Engine) {
 	category := router.Group("/category")
 	{
 		category.POST("", handler.CreateCategory)
+		category.DELETE("/:id", handler.DeleteCategory)
+		category.PUT("/:id", handler.RenameCategory)
 	}
 }

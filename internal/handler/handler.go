@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"collectify/internal/pkg/e"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -39,4 +41,15 @@ func FailWithData(c *gin.Context, err error, data interface{}) {
 		"msg":  err.Error(),
 		"data": data,
 	})
+}
+
+// ----------------------------------
+
+func GetID(c *gin.Context, idKey string) (uint, error) {
+	idStr := c.Param(idKey)
+	id := cast.ToUint(idStr)
+	if id <= 0 {
+		return 0, e.ErrInvalidParams
+	}
+	return id, nil
 }
