@@ -3,11 +3,14 @@ package handler
 import (
 	"collectify/internal/dao"
 	"collectify/internal/db"
+	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	"collectify/internal/pkg/e"
 	"collectify/internal/service"
+	"errors"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CreateCategory(c *gin.Context) {
@@ -99,4 +102,49 @@ func RenameCategory(c *gin.Context) {
 	}
 
 	Success(c)
+}
+
+func GetCategory(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	category, err := dao.Get[model.Category](db.GetDB(), map[string]interface{}{"id": id})
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			Fail(c, e.ErrNotFound)
+			return
+		}
+		Fail(c, err)
+		return
+	}
+
+	SuccessWithData(c, category)
+}
+
+func SearchCategory(c *gin.Context) {
+	var req SearchReq
+	if err := c.ShouldBind(&req); err != nil {
+		Fail(c, err)
+		return
+	}
+
+	pagination := common.Pagination{
+		Disable: req.NoPaging,
+		Page:    req.Page,
+		Size:    req.PageSize,
+	}
+
+	categories, total, err := dao.GetList[model.Category](db.GetDB(), req.Filters, pagination)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	SuccessWithData(c, SearchResp{
+		List:  categories,
+		Total: total,
+	})
 }

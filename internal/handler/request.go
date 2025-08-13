@@ -4,6 +4,13 @@ type DeletedReq struct {
 	List []DeletedReqItem `json:"list" form:"list" binding:"required,dive"`
 }
 
+type SearchReq struct {
+	NoPaging bool                   `json:"no_paging" form:"no_paging"` // 是否禁用分页
+	Page     int                    `json:"page" form:"page" binding:"required,gt=0"`
+	PageSize int                    `json:"page_size" form:"page_size" binding:"required,gt=0"`
+	Filters  map[string]interface{} `json:"filters" form:"filters"`
+}
+
 type DeletedReqItem struct {
 	ID   uint   `json:"id" form:"id" binding:"required,gt=0"`
 	Type string `json:"type" form:"type" binding:"required,oneof=category collection field item tag"`

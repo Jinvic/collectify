@@ -52,16 +52,18 @@ func GetList[T model.GormModel](tx *gorm.DB, filters map[string]interface{}, p c
 	var t []T
 	query := tx.Model(&t)
 
-	if filters["name"] != nil {
-		query = query.Where("name = ?", filters["name"])
-	}
+	query = query.Where(filters)
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := query.Offset(p.GetOffset()).Limit(p.GetLimit()).Find(&t).Error; err != nil {
+	if !p.Disable {
+		query = query.Offset(p.GetOffset()).Limit(p.GetLimit())
+	}
+
+	if err := query.Find(&t).Error; err != nil {
 		return nil, 0, err
 	}
 	return t, total, nil

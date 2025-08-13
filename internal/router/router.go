@@ -20,8 +20,10 @@ func initCategoryRouter(router *gin.Engine) {
 	category := router.Group("/category")
 	{
 		category.POST("", handler.CreateCategory)
+		category.GET("/:id", handler.GetCategory)
+		category.PATCH("/:id", handler.RenameCategory)
 		category.DELETE("/:id", handler.DeleteCategory)
-		category.PUT("/:id", handler.RenameCategory)
+		category.POST("/search", handler.SearchCategory)
 	}
 }
 

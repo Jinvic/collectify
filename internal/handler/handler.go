@@ -45,6 +45,7 @@ func FailWithData(c *gin.Context, err error, data interface{}) {
 
 // ----------------------------------
 
+// 从路径中获取ID并验证
 func GetID(c *gin.Context, idKey string) (uint, error) {
 	idStr := c.Param(idKey)
 	id := cast.ToUint(idStr)

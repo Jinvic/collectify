@@ -1,8 +1,9 @@
 package model
 
 type Pagination struct {
-	Page int `json:"page" form:"page"` // 当前页码
-	Size int `json:"size" form:"size"` // 每页数量
+	Disable bool `json:"disable" form:"disable"` // 是否禁用分页
+	Page    int  `json:"page" form:"page"`       // 当前页码
+	Size    int  `json:"size" form:"size"`       // 每页数量
 }
 
 func (p *Pagination) GetOffset() int {
