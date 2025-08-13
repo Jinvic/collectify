@@ -13,14 +13,15 @@ func Restore(c *gin.Context) {
 		return
 	}
 
-	uniqueFields := map[string]interface{}{
-		"id": req.ID,
-	}
-
-	err := service.Restore(req.Type, uniqueFields)
-	if err != nil {
-		Fail(c, err)
-		return
+	for _, item := range req.List {
+		uniqueFields := map[string]interface{}{
+			"id": item.ID,
+		}
+		err := service.Restore(item.Type, uniqueFields)
+		if err != nil {
+			Fail(c, err)
+			return
+		}
 	}
 
 	Success(c)
@@ -33,14 +34,15 @@ func HardDelete(c *gin.Context) {
 		return
 	}
 
-	uniqueFields := map[string]interface{}{
-		"id": req.ID,
-	}
-
-	err := service.HardDelete(req.Type, uniqueFields)
-	if err != nil {
-		Fail(c, err)
-		return
+	for _, item := range req.List {
+		uniqueFields := map[string]interface{}{
+			"id": item.ID,
+		}
+		err := service.HardDelete(item.Type, uniqueFields)
+		if err != nil {
+			Fail(c, err)
+			return
+		}
 	}
 
 	Success(c)
