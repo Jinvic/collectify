@@ -23,7 +23,9 @@ func CreateCategory(c *gin.Context) {
 	}
 
 	// 检查是否重复
-	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), map[string]interface{}{"name": req.Name})
+	uniqueFields := map[string]interface{}{"name": req.Name}
+	filters := []dao.Filter{}
+	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), uniqueFields, filters)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -87,10 +89,16 @@ func RenameCategory(c *gin.Context) {
 	}
 
 	// 检查是否重复
-	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), map[string]interface{}{
-		"name":    req.Name,
-		"id != ?": id,
-	})
+	uniqueFields := map[string]interface{}{
+		"name": req.Name,
+	}
+	filters := []dao.Filter{
+		{
+			Where: "id != ?",
+			Args:  []interface{}{id},
+		},
+	}
+	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), uniqueFields, filters)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -103,7 +111,7 @@ func RenameCategory(c *gin.Context) {
 		return
 	}
 
-	uniqueFields := map[string]interface{}{"id": id}
+	uniqueFields = map[string]interface{}{"id": id}
 	updateFields := map[string]interface{}{"name": req.Name}
 	err = dao.Update[model.Category](db.GetDB(), uniqueFields, updateFields)
 	if err != nil {

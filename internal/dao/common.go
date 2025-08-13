@@ -8,9 +8,20 @@ import (
 	"gorm.io/gorm"
 )
 
-func DuplicateCheck[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) (id uint, isDeleted bool, err error) {
+type Filter struct {
+	Where string
+	Args  []interface{}
+}
+
+// uniqueFields: 业务上需要检查唯一性的字段，如 name, email
+// filters: 查询时的附加条件，如排除当前记录、状态过滤等
+func DuplicateCheck[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, filters []Filter) (id uint, isDeleted bool, err error) {
 	var t T
-	err = tx.Model(&t).Where(uniqueFields).First(&t).Error
+	query := tx.Model(&t).Where(uniqueFields)
+	for _, filter := range filters {
+		query = query.Where(filter.Where, filter.Args...)
+	}
+	err = query.First(&t).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, false, nil
@@ -46,11 +57,6 @@ func HardDelete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interfac
 func Get[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) (T, error) {
 	var t T
 	return t, tx.Model(&t).Where(uniqueFields).First(&t).Error
-}
-
-type Filter struct {
-	Where string
-	Args  []interface{}
 }
 
 func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, p common.Pagination) ([]T, int64, error) {

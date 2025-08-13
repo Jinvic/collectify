@@ -4,3 +4,5 @@ database:
 server:
   port: 8080
   mode: release
+recycle_bin:
+  enabled: true
