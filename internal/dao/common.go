@@ -48,11 +48,18 @@ func Get[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) (T
 	return t, tx.Model(&t).Where(uniqueFields).First(&t).Error
 }
 
-func GetList[T model.GormModel](tx *gorm.DB, filters map[string]interface{}, p common.Pagination) ([]T, int64, error) {
+type Filter struct {
+	Where string
+	Args  []interface{}
+}
+
+func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, p common.Pagination) ([]T, int64, error) {
 	var t []T
 	query := tx.Model(&t)
 
-	query = query.Where(filters)
+	for _, filter := range filters {
+		query = query.Where(filter.Where, filter.Args...)
+	}
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {

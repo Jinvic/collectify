@@ -10,6 +10,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"gorm.io/gorm"
 )
 
@@ -137,7 +138,16 @@ func SearchCategory(c *gin.Context) {
 		Size:    req.PageSize,
 	}
 
-	categories, total, err := dao.GetList[model.Category](db.GetDB(), req.Filters, pagination)
+	var filters []dao.Filter
+
+	if name, ok := req.Filters["name"]; ok {
+		filters = append(filters, dao.Filter{
+			Where: "name LIKE ?",
+			Args:  []interface{}{"%" + cast.ToString(name) + "%"},
+		})
+	}
+
+	categories, total, err := dao.GetList[model.Category](db.GetDB(), filters, pagination)
 	if err != nil {
 		Fail(c, err)
 		return
