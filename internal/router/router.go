@@ -23,7 +23,7 @@ func initCategoryRouter(router *gin.Engine) {
 		category.GET("/:id", handler.GetCategory)
 		category.PATCH("/:id", handler.RenameCategory)
 		category.DELETE("/:id", handler.DeleteCategory)
-		category.POST("/search", handler.SearchCategory)
+		category.GET("/list", handler.ListCategory)
 		category.POST("/:id/restore", handler.RestoreCategory)
 	}
 }
@@ -44,5 +44,8 @@ func initItemRouter(router *gin.Engine) {
 		item.DELETE("/:id", handler.DeleteItem)
 		item.PUT("/:id", handler.UpdateItem)
 		item.POST("/:id/restore", handler.RestoreItem)
+		item.GET("/list", handler.ListItems)
+		item.POST("/search", handler.SearchItems)
+		item.GET("/:id", handler.GetItem)
 	}
 }

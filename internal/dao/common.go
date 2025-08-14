@@ -13,6 +13,16 @@ type Filter struct {
 	Args  []interface{}
 }
 
+type OrderBy struct {
+	Column string
+	Desc   bool
+}
+
+type Join struct {
+	Table string
+	On    string
+}
+
 // uniqueFields: 业务上需要检查唯一性的字段，如 name, email
 // filters: 查询时的附加条件，如排除当前记录、状态过滤等
 func DuplicateCheck[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, filters []Filter) (id uint, isDeleted bool, err error) {
@@ -90,16 +100,20 @@ func DeleteByFilter[T model.GormModel](tx *gorm.DB, filters []Filter, isSoftDele
 
 func Get[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, preloads ...string) (T, error) {
 	var t T
-	query := tx.Model(&t).Where(uniqueFields)
+	query := tx.Model(&t)
 	for _, preload := range preloads {
 		query = query.Preload(preload)
 	}
-	return t, query.First(&t).Error
+	return t, query.Where(uniqueFields).First(&t).Error
 }
 
-func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, p common.Pagination) ([]T, int64, error) {
+func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, orderBy []OrderBy, p common.Pagination, preloads ...string) ([]T, int64, error) {
 	var t []T
 	query := tx.Model(&t)
+
+	for _, preload := range preloads {
+		query = query.Preload(preload)
+	}
 
 	for _, filter := range filters {
 		query = query.Where(filter.Where, filter.Args...)
@@ -110,6 +124,16 @@ func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, p common.Paginati
 		return nil, 0, err
 	}
 
+	for _, orderBy := range orderBy {
+		var sort string
+		if orderBy.Desc {
+			sort = "DESC"
+		} else {
+			sort = "ASC"
+		}
+		query = query.Order(orderBy.Column + " " + sort)
+	}
+
 	if !p.Disable {
 		query = query.Offset(p.GetOffset()).Limit(p.GetLimit())
 	}
@@ -118,6 +142,26 @@ func GetList[T model.GormModel](tx *gorm.DB, filters []Filter, p common.Paginati
 		return nil, 0, err
 	}
 	return t, total, nil
+}
+
+func Pluck[T model.GormModel, R any](tx *gorm.DB, column string, joins []Join, filters []Filter, distinct bool) ([]R, error) {
+	var t []T
+	var r []R
+	query := tx.Model(&t)
+	for _, join := range joins {
+		query = query.Joins(join.On)
+	}
+	for _, filter := range filters {
+		query = query.Where(filter.Where, filter.Args...)
+	}
+	if distinct {
+		query = query.Distinct(column)
+	}
+	err := query.Pluck(column, &r).Error
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 func Update[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, updateFields map[string]interface{}) error {

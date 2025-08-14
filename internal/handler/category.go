@@ -11,7 +11,6 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 	"gorm.io/gorm"
 )
 
@@ -152,29 +151,32 @@ func GetCategory(c *gin.Context) {
 	SuccessWithData(c, category)
 }
 
-func SearchCategory(c *gin.Context) {
-	var req define.SearchReq
-	if err := c.ShouldBind(&req); err != nil {
-		Fail(c, err)
-		return
-	}
-
-	pagination := common.Pagination{
-		Disable: req.NoPaging,
-		Page:    req.Page,
-		Size:    req.PageSize,
-	}
+func ListCategory(c *gin.Context) {
+	name := c.Query("name")
 
 	var filters []dao.Filter
+	var orderBy []dao.OrderBy
 
-	if name, ok := req.Filters["name"]; ok {
+	if name != "" {
 		filters = append(filters, dao.Filter{
 			Where: "name LIKE ?",
-			Args:  []interface{}{"%" + cast.ToString(name) + "%"},
+			Args:  []interface{}{"%" + name + "%"},
 		})
 	}
 
-	categories, total, err := dao.GetList[model.Category](db.GetDB(), filters, pagination)
+	// 不分页
+	pagination := common.Pagination{
+		Disable: true,
+	}
+
+	// 创建时间顺序排序
+	orderBy = []dao.OrderBy{
+		{
+			Column: "created_at",
+			Desc:   false,
+		},
+	}
+	categories, total, err := dao.GetList[model.Category](db.GetDB(), filters, orderBy, pagination)
 	if err != nil {
 		Fail(c, err)
 		return

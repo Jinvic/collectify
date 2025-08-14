@@ -3,6 +3,7 @@ package dao
 import (
 	model "collectify/internal/model/db"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/cast"
@@ -148,4 +149,121 @@ func (c *FieldValueCreator) createArrayValues() error {
 // createSingleValueWith 用于数组场景，避免重复写 dao.Create
 func (c *FieldValueCreator) createSingleValueWith(tx *gorm.DB, ifv *model.ItemFieldValue) error {
 	return Create(tx, ifv)
+}
+
+type FieldValueQueryBuilder struct {
+	tx    *gorm.DB
+	field model.Field
+	value interface{}
+}
+
+func NewFieldValueQueryBuilder(tx *gorm.DB, field model.Field, value interface{}) *FieldValueQueryBuilder {
+	return &FieldValueQueryBuilder{
+		tx:    tx,
+		field: field,
+		value: value,
+	}
+}
+
+func (b *FieldValueQueryBuilder) Build() (Filter, error) {
+	var filter Filter
+
+	wheres := []string{
+		"item_field_values.field_id = ?",
+	}
+	filter.Where = mergeWheres("AND", wheres...)
+	filter.Args = []interface{}{
+		b.field.ID,
+	}
+
+	if b.field.IsArray {
+		b.queryArrayValues(&filter)
+	} else {
+		b.querySingleValue(&filter)
+	}
+
+	return filter, nil
+}
+
+func (b *FieldValueQueryBuilder) querySingleValue(filter *Filter) error {
+	switch b.field.Type {
+	case model.FieldTypeString:
+		value, err := cast.ToStringE(b.value)
+		if err != nil {
+			return err
+		}
+
+		newWhere := "item_field_values.value_string LIKE ?"
+		filter.Args = append(filter.Args, "%"+value+"%")
+		filter.Where = mergeWheres("AND", filter.Where, newWhere)
+
+	case model.FieldTypeInt:
+		value, err := cast.ToIntE(b.value)
+		if err != nil {
+			return err
+		}
+		newWhere := "item_field_values.value_int = ?"
+		filter.Args = append(filter.Args, value)
+		filter.Where = mergeWheres("AND", filter.Where, newWhere)
+
+	case model.FieldTypeBool:
+		value, err := cast.ToBoolE(b.value)
+		if err != nil {
+			return err
+		}
+		newWhere := "item_field_values.value_bool = ?"
+		filter.Args = append(filter.Args, value)
+		filter.Where = mergeWheres("AND", filter.Where, newWhere)
+
+	case model.FieldTypeDatetime:
+		// TODO: 时间值查询方式不确定
+	}
+
+	return nil
+}
+
+func (b *FieldValueQueryBuilder) queryArrayValues(filter *Filter) error {
+	switch b.field.Type {
+	case model.FieldTypeString:
+		values, err := cast.ToStringSliceE(b.value)
+		if err != nil {
+			return err
+		}
+
+		wheres := []string{}
+		for _, value := range values {
+			wheres = append(wheres, "item_field_values.value_string LIKE ?")
+			filter.Args = append(filter.Args, "%"+value+"%")
+		}
+		newWhere := mergeWheres("OR", wheres...)
+		filter.Where = mergeWheres("AND", filter.Where, newWhere)
+
+	case model.FieldTypeInt:
+		values, err := cast.ToIntSliceE(b.value)
+		if err != nil {
+			return err
+		}
+		newWhere := "item_field_values.value_int IN ?"
+		filter.Args = append(filter.Args, values)
+		filter.Where = mergeWheres("AND", filter.Where, newWhere)
+
+	case model.FieldTypeBool:
+		// TODO: 布尔值数组意义不确定
+
+	case model.FieldTypeDatetime:
+		// TODO: 时间值数组查询方式不确定
+	}
+
+	return nil
+}
+
+func mergeWheres(op string, wheres ...string) string {
+	if len(wheres) == 0 {
+		return ""
+	}
+
+	op = fmt.Sprintf(" %s ", strings.ToUpper(op))
+	where := strings.Join(wheres, op)
+
+	return fmt.Sprintf("(%s)", where)
 }

@@ -4,11 +4,14 @@ type DeletedReq struct {
 	List []DeletedReqItem `json:"list" form:"list" binding:"required,dive"`
 }
 
+type ListReq struct {
+	NoPaging bool `json:"no_paging" form:"no_paging"` // 是否禁用分页
+	Page     int  `json:"page" form:"page"`
+	PageSize int  `json:"page_size" form:"page_size"`
+}
 type SearchReq struct {
-	NoPaging bool                   `json:"no_paging" form:"no_paging"` // 是否禁用分页
-	Page     int                    `json:"page" form:"page"`
-	PageSize int                    `json:"page_size" form:"page_size"`
-	Filters  map[string]interface{} `json:"filters" form:"filters"`
+	ListReq
+	Filters map[uint]interface{} `json:"filters" form:"filters"`
 }
 
 type DeletedReqItem struct {
@@ -42,4 +45,12 @@ type UpdateItemReq struct {
 	ID     uint             `json:"id" form:"id" binding:"required,gt=0"`
 	Title  string           `json:"title" form:"title" binding:"required"`
 	Values []ItemFieldValue `json:"values" form:"values" binding:"required,dive"`
+}
+
+type SearchItemsReq struct {
+	SearchReq
+	CategoryID    uint   `json:"category_id" form:"category_id" binding:"required,gt=0"`
+	Title         string `json:"title" form:"title"`
+	TagIDs        []uint `json:"tag_ids" form:"tag_ids"`
+	CollectionIDs []uint `json:"collection_ids" form:"collection_ids"`
 }

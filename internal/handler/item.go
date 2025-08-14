@@ -3,6 +3,7 @@ package handler
 import (
 	"collectify/internal/dao"
 	"collectify/internal/db"
+	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
 	"collectify/internal/pkg/e"
@@ -91,4 +92,66 @@ func RestoreItem(c *gin.Context) {
 	}
 
 	Success(c)
+}
+
+func ListItems(c *gin.Context) {
+	pagination, err := GetPagination(c)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	items, total, err := service.ListItems(pagination)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	SuccessWithData(c, define.SearchResp{
+		List:  items,
+		Total: total,
+	})
+}
+
+func SearchItems(c *gin.Context) {
+	var req define.SearchItemsReq
+	if err := c.ShouldBind(&req); err != nil {
+		Fail(c, err)
+		return
+	}
+
+	pagination := common.Pagination{
+		Disable: req.NoPaging,
+		Page:    req.Page,
+		Size:    req.PageSize,
+	}
+
+	items, total, err := service.SearchItems(req.CategoryID, req.Title, req.TagIDs, req.CollectionIDs, req.Filters, pagination)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	SuccessWithData(c, define.SearchResp{
+		List:  items,
+		Total: total,
+	})
+}
+
+func GetItem(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	uniqueFields := map[string]interface{}{"id": id}
+	preloads := []string{"Category", "Tags", "Collections", "Values"}
+	item, err := dao.Get[model.Item](db.GetDB(), uniqueFields, preloads...)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	SuccessWithData(c, item)
 }

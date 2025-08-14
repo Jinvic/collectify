@@ -4,6 +4,7 @@ import (
 	"collectify/internal/config"
 	"collectify/internal/dao"
 	"collectify/internal/db"
+	"collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
 	"fmt"
@@ -183,4 +184,142 @@ func RestoreItem(itemID uint) error {
 	})
 
 	return err
+}
+
+// ListItems 列出收藏品
+func ListItems(p common.Pagination) ([]model.Item, int64, error) {
+	db := db.GetDB()
+
+	filters := []dao.Filter{}
+	orderBy := []dao.OrderBy{
+		{
+			Column: "updated_at",
+			Desc:   true,
+		},
+	}
+	preloads := []string{
+		"Category",
+		"Tags",
+	}
+
+	items, total, err := dao.GetList[model.Item](db, filters, orderBy, p, preloads...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return items, total, nil
+}
+
+// SearchItems 搜索收藏品
+func SearchItems(categoryID uint, title string, tagIDs []uint, collectionIDs []uint, fs map[uint]interface{}, p common.Pagination) ([]model.Item, int64, error) {
+	db := db.GetDB()
+
+	// 预加载关联表
+	joins := []dao.Join{
+		{
+			Table: "tags",
+			On:    "items.id = item_tags.item_id",
+		},
+		{
+			Table: "collections",
+			On:    "items.id = collection_items.item_id",
+		},
+		{
+			Table: "item_field_values",
+			On:    "items.id = item_field_values.item_id",
+		},
+	}
+
+	// 分类必选
+	filters := []dao.Filter{
+		{
+			Where: "items.category_id = ?",
+			Args:  []interface{}{categoryID},
+		},
+	}
+	// 标题可选
+	if title != "" {
+		filters = append(filters, dao.Filter{
+			Where: "items.title LIKE ?",
+			Args:  []interface{}{"%" + title + "%"},
+		})
+	}
+	if len(tagIDs) > 0 {
+		filters = append(filters, dao.Filter{
+			Where: "tags.id IN ?",
+			Args:  []interface{}{tagIDs},
+		})
+	}
+	if len(collectionIDs) > 0 {
+		filters = append(filters, dao.Filter{
+			Where: "collections.id IN ?",
+			Args:  []interface{}{collectionIDs},
+		})
+	}
+
+	// 更新时间逆序排序
+	orderBy := []dao.OrderBy{
+		{
+			Column: "updated_at",
+			Desc:   true,
+		},
+	}
+
+	// 预加载关联表
+	preloads := []string{
+		"Category",
+		"Tags",
+		"Collections",
+		"Values",
+	}
+
+	var items []model.Item
+	var total int64
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// 获取分类信息，并预加载字段
+		fieldMap := make(map[uint]model.Field)
+		category, err := dao.Get[model.Category](tx, map[string]interface{}{"id": categoryID}, "Fields")
+		if err != nil {
+			return err
+		}
+		for _, field := range category.Fields {
+			fieldMap[field.ID] = field
+		}
+
+		// 遍历并添加字段值过滤条件
+		for key, value := range fs {
+			field, ok := fieldMap[key]
+			if !ok {
+				return fmt.Errorf("field not found: %d", key)
+			}
+
+			builder := dao.NewFieldValueQueryBuilder(tx, field, value)
+			filter, err := builder.Build()
+			if err != nil {
+				return err
+			}
+			filters = append(filters, filter)
+		}
+
+		// 先查询出所有符合条件的收藏品ID，再预加载关联表，避免笛卡尔积查询
+		itemIDs, err := dao.Pluck[model.ItemFieldValue, uint](tx, "item.id", joins, filters, true)
+		if err != nil {
+			return err
+		}
+
+		filters = []dao.Filter{
+			{
+				Where: "items.id IN ?",
+				Args:  []interface{}{itemIDs},
+			},
+		}
+		items, total, err = dao.GetList[model.Item](tx, filters, orderBy, p, preloads...)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return items, total, err
 }
