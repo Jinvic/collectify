@@ -33,6 +33,15 @@ var softDeleteFuncs = map[string]func(tx *gorm.DB, uniqueFields map[string]inter
 	model.ModelTypeTag:        dao.SoftDelete[model.Tag],
 }
 
+var hardDeleteByFilterFuncs = map[string]func(tx *gorm.DB, filters []dao.Filter) error{
+	model.ModelTypeCategory:   dao.HardDeleteByFilter[model.Category],
+	model.ModelTypeCollection: dao.HardDeleteByFilter[model.Collection],
+	model.ModelTypeField:      dao.HardDeleteByFilter[model.Field],
+	model.ModelTypeItem:       dao.HardDeleteByFilter[model.Item],
+	model.ModelTypeTag:        dao.HardDeleteByFilter[model.Tag],
+	model.ModelTypeIFV:        dao.HardDeleteByFilter[model.ItemFieldValue],
+}
+
 func Restore(typ string, uniqueFields map[string]interface{}) error {
 	db := db.GetDB()
 	fn, ok := restoreFuncs[typ]
@@ -63,26 +72,16 @@ func SoftDelete(typ string, uniqueFields map[string]interface{}) error {
 func ClearRecycleBin() error {
 	db := db.GetDB()
 
-	err := db.Unscoped().Model(&model.Category{}).Where("deleted_at is not null").Delete(&model.Category{}).Error
-	if err != nil {
-		return err
+	filters := []dao.Filter{
+		{
+			Where: "deleted_at is not null",
+		},
 	}
-	err = db.Unscoped().Model(&model.Collection{}).Where("deleted_at is not null").Delete(&model.Collection{}).Error
-	if err != nil {
-		return err
+	for _, fn := range hardDeleteByFilterFuncs {
+		err := fn(db, filters)
+		if err != nil {
+			return err
+		}
 	}
-	err = db.Unscoped().Model(&model.Field{}).Where("deleted_at is not null").Delete(&model.Field{}).Error
-	if err != nil {
-		return err
-	}
-	err = db.Unscoped().Model(&model.Item{}).Where("deleted_at is not null").Delete(&model.Item{}).Error
-	if err != nil {
-		return err
-	}
-	err = db.Unscoped().Model(&model.Tag{}).Where("deleted_at is not null").Delete(&model.Tag{}).Error
-	if err != nil {
-		return err
-	}
-
 	return nil
 }

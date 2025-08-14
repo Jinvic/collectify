@@ -54,6 +54,18 @@ func HardDelete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interfac
 	return tx.Unscoped().Model(&t).Where(uniqueFields).Delete(&t).Error
 }
 
+func HardDeleteByFilter[T model.GormModel](tx *gorm.DB, filters []Filter) error {
+	var t T
+
+	query := tx.Model(&t).Unscoped()
+
+	for _, filter := range filters {
+		query = query.Where(filter.Where, filter.Args...)
+	}
+
+	return query.Delete(&t).Error
+}
+
 func Get[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, preloads ...string) (T, error) {
 	var t T
 	query := tx.Model(&t).Where(uniqueFields)
