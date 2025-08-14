@@ -177,9 +177,15 @@ func (b *FieldValueQueryBuilder) Build() (Filter, error) {
 	}
 
 	if b.field.IsArray {
-		b.queryArrayValues(&filter)
+		err := b.queryArrayValues(&filter)
+		if err != nil {
+			return Filter{}, err
+		}
 	} else {
-		b.querySingleValue(&filter)
+		err := b.querySingleValue(&filter)
+		if err != nil {
+			return Filter{}, err
+		}
 	}
 
 	return filter, nil

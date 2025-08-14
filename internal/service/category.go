@@ -129,10 +129,8 @@ func tryRestoreCategory(tx *gorm.DB, categoryID uint) error {
 		return nil
 	}
 
-	var uniqueFields map[string]interface{}
-
 	// 恢复分类
-	uniqueFields = map[string]interface{}{"id": categoryID}
+	uniqueFields := map[string]interface{}{"id": categoryID}
 	err = dao.Restore[model.Category](tx, uniqueFields)
 	if err != nil {
 		return err
