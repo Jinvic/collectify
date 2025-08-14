@@ -8,26 +8,23 @@ import (
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
 
 // CreateItem 创建收藏品
-func CreateItem(categoryID uint, title string, values []define.ItemFieldValue) error {
+func CreateItem(item *model.Item, values []define.ItemFieldValue) error {
 	db := db.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// 创建收藏品
-		item := &model.Item{
-			CategoryID: categoryID,
-			Title:      title,
-		}
 		if err := dao.Create(tx, item); err != nil {
 			return err
 		}
 
 		// 获取分类信息，并预加载字段
-		uniqueFields := map[string]interface{}{"id": categoryID}
+		uniqueFields := map[string]interface{}{"id": item.CategoryID}
 		preloads := []string{"Fields"}
 		category, err := dao.Get[model.Category](tx, uniqueFields, preloads...)
 		if err != nil {
@@ -61,36 +58,55 @@ func CreateItem(categoryID uint, title string, values []define.ItemFieldValue) e
 }
 
 // UpdateItem 更新收藏品信息
-func UpdateItem(itemID uint, title string, values []define.ItemFieldValue) error {
+func UpdateItem(item *model.Item, values []define.ItemFieldValue) error {
 	db := db.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		uniqueFields := map[string]interface{}{"id": itemID}
+		uniqueFields := map[string]interface{}{"id": item.ID}
 		preloads := []string{
 			"Category",        // 预加载所属分类
 			"Category.Fields", // 预加载分类的字段
 			"Values",          // 预加载已有字段值
 		}
-		item, err := dao.Get[model.Item](tx, uniqueFields, preloads...)
+		oldItem, err := dao.Get[model.Item](tx, uniqueFields, preloads...)
 		if err != nil {
 			return err
 		}
 
-		// 如果标题有变化，则更新标题
-		if title != item.Title {
-			updateFields := map[string]interface{}{"title": title}
-			if err := dao.Update[model.Item](tx, uniqueFields, updateFields); err != nil {
-				return err
-			}
+		// 更新收藏品信息
+		updateFields := map[string]interface{}{
+			"title":       item.Title,
+			"status":      item.Status,
+			"rating":      item.Rating,
+			"description": item.Description,
+			"notes":       item.Notes,
+			"cover_url":   item.CoverURL,
+			"source_url":  item.SourceURL,
+			"priority":    item.Priority,
+		}
+
+		// 更新完成时间
+		now := time.Now()
+		if oldItem.Status != model.ItemStatusCompleted &&
+			item.Status == model.ItemStatusCompleted {
+			updateFields["completed_at"] = &now
+		}
+		if oldItem.Status == model.ItemStatusCompleted &&
+			item.Status != model.ItemStatusCompleted {
+			updateFields["completed_at"] = nil
+		}
+
+		if err := dao.Update[model.Item](tx, uniqueFields, updateFields); err != nil {
+			return err
 		}
 
 		fieldMap := make(map[uint]model.Field)
-		for _, field := range item.Category.Fields {
+		for _, field := range oldItem.Category.Fields {
 			fieldMap[field.ID] = field
 		}
 
 		// 删除原有的字段值
-		uniqueFields = map[string]interface{}{"item_id": itemID}
+		uniqueFields = map[string]interface{}{"item_id": item.ID}
 		err = dao.Delete[model.ItemFieldValue](tx, uniqueFields, false) // 硬删除字段值
 		if err != nil {
 			return err

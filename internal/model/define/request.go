@@ -37,14 +37,12 @@ type CreateFieldReq struct {
 
 type CreateItemReq struct {
 	CategoryID uint             `json:"category_id" form:"category_id" binding:"required,gt=0"`
-	Title      string           `json:"title" form:"title" binding:"required"`
-	Values     []ItemFieldValue `json:"values" form:"values" binding:"required,dive"`
+	Item       Item             `json:"item" form:"item" binding:"required"`
 }
 
 type UpdateItemReq struct {
-	ID     uint             `json:"id" form:"id" binding:"required,gt=0"`
-	Title  string           `json:"title" form:"title" binding:"required"`
-	Values []ItemFieldValue `json:"values" form:"values" binding:"required,dive"`
+	ID          uint             `json:"id" form:"id" binding:"required,gt=0"`
+	Item       Item             `json:"item" form:"item" binding:"required"`
 }
 
 type SearchItemsReq struct {

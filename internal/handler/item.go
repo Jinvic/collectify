@@ -6,7 +6,6 @@ import (
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
-	"collectify/internal/pkg/e"
 	"collectify/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -19,25 +18,10 @@ func CreateItem(c *gin.Context) {
 		return
 	}
 
-	uniqueFields := map[string]interface{}{
-		"category_id": req.CategoryID,
-		"title":       req.Title,
-	}
-	filters := []dao.Filter{}
-	id, isDeleted, err := dao.DuplicateCheck[model.Item](db.GetDB(), uniqueFields, filters)
-	if err != nil {
-		Fail(c, err)
-		return
-	}
-	if id != 0 {
-		FailWithData(c, e.ErrDuplicated, map[string]interface{}{
-			"id":        id,
-			"isDeleted": isDeleted,
-		})
-		return
-	}
+	item := req.Item.ToDB()
+	item.CategoryID = req.CategoryID
 
-	err = service.CreateItem(req.CategoryID, req.Title, req.Values)
+	err := service.CreateItem(item, req.Item.Values)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -53,7 +37,10 @@ func UpdateItem(c *gin.Context) {
 		return
 	}
 
-	err := service.UpdateItem(req.ID, req.Title, req.Values)
+	item := req.Item.ToDB()
+	item.ID = req.ID
+
+	err := service.UpdateItem(item, req.Item.Values)
 	if err != nil {
 		Fail(c, err)
 		return
