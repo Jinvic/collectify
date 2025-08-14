@@ -44,3 +44,51 @@ func CreateItem(c *gin.Context) {
 
 	Success(c)
 }
+
+func UpdateItem(c *gin.Context) {
+	var req define.UpdateItemReq
+	if err := c.ShouldBind(&req); err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err := service.UpdateItem(req.ID, req.Title, req.Values)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func DeleteItem(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = service.DeleteItem(id)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func RestoreItem(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = service.RestoreItem(id)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}

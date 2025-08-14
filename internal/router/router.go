@@ -11,8 +11,7 @@ func InitRouter() *gin.Engine {
 
 	initCategoryRouter(router)
 	initFieldRouter(router)
-
-	initDeletedRouter(router)
+	initItemRouter(router)
 
 	return router
 }
@@ -25,14 +24,7 @@ func initCategoryRouter(router *gin.Engine) {
 		category.PATCH("/:id", handler.RenameCategory)
 		category.DELETE("/:id", handler.DeleteCategory)
 		category.POST("/search", handler.SearchCategory)
-	}
-}
-
-func initDeletedRouter(router *gin.Engine) {
-	deleted := router.Group("/deleted")
-	{
-		deleted.POST("", handler.Restore)
-		deleted.DELETE("", handler.HardDelete)
+		category.POST("/:id/restore", handler.RestoreCategory)
 	}
 }
 
@@ -41,5 +33,16 @@ func initFieldRouter(router *gin.Engine) {
 	{
 		field.POST("", handler.CreateField)
 		field.DELETE("/:id", handler.DeleteField)
+		field.POST("/:id/restore", handler.RestoreField)
+	}
+}
+
+func initItemRouter(router *gin.Engine) {
+	item := router.Group("/item")
+	{
+		item.POST("", handler.CreateItem)
+		item.DELETE("/:id", handler.DeleteItem)
+		item.PUT("/:id", handler.UpdateItem)
+		item.POST("/:id/restore", handler.RestoreItem)
 	}
 }

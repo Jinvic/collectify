@@ -1,6 +1,7 @@
 package service
 
 import (
+	"collectify/internal/config"
 	"collectify/internal/dao"
 	"collectify/internal/db"
 	model "collectify/internal/model/db"
@@ -89,7 +90,7 @@ func UpdateItem(itemID uint, title string, values []define.ItemFieldValue) error
 
 		// 删除原有的字段值
 		uniqueFields = map[string]interface{}{"item_id": itemID}
-		err = dao.HardDelete[model.ItemFieldValue](tx, uniqueFields)
+		err = dao.Delete[model.ItemFieldValue](tx, uniqueFields, false) // 硬删除字段值
 		if err != nil {
 			return err
 		}
@@ -107,6 +108,75 @@ func UpdateItem(itemID uint, title string, values []define.ItemFieldValue) error
 			if err := creator.Create(); err != nil {
 				return err
 			}
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// DeleteItem 删除收藏品
+func DeleteItem(itemID uint) error {
+	db := db.GetDB()
+	cfg := config.GetConfig()
+	isSoftDelete := cfg.RecycleBin.Enable
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var uniqueFields map[string]interface{}
+		var err error
+
+		// 删除收藏品下的字段值
+		uniqueFields = map[string]interface{}{"item_id": itemID}
+		err = dao.Delete[model.ItemFieldValue](tx, uniqueFields, isSoftDelete)
+		if err != nil {
+			return err
+		}
+
+		// 删除收藏品
+		uniqueFields = map[string]interface{}{"id": itemID}
+		err = dao.Delete[model.Item](tx, uniqueFields, isSoftDelete)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// RestoreItem 恢复收藏品
+func RestoreItem(itemID uint) error {
+	db := db.GetDB()
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var uniqueFields map[string]interface{}
+		var err error
+
+		// 尝试恢复分类和分类下的字段
+		var item model.Item
+		err = tx.Unscoped().Model(&item).Where("id = ?", itemID).First(&item).Error
+		if err != nil {
+			return err
+		}
+		err = tryRestoreCategoryWithFields(tx, item.CategoryID)
+		if err != nil {
+			return err
+		}
+
+		// 恢复收藏品
+		uniqueFields = map[string]interface{}{"id": itemID}
+		err = dao.Restore[model.Item](tx, uniqueFields)
+		if err != nil {
+			return err
+		}
+
+		// 恢复收藏品下的字段值
+		uniqueFields = map[string]interface{}{"item_id": itemID}
+		err = dao.Restore[model.ItemFieldValue](tx, uniqueFields)
+		if err != nil {
+			return err
 		}
 
 		return nil

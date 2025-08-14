@@ -4,69 +4,17 @@ import (
 	"collectify/internal/dao"
 	"collectify/internal/db"
 	model "collectify/internal/model/db"
-	"collectify/internal/pkg/e"
 
 	"gorm.io/gorm"
 )
 
-var restoreFuncs = map[string]func(tx *gorm.DB, uniqueFields map[string]interface{}) error{
-	model.ModelTypeCategory:   dao.Restore[model.Category],
-	model.ModelTypeCollection: dao.Restore[model.Collection],
-	model.ModelTypeField:      dao.Restore[model.Field],
-	model.ModelTypeItem:       dao.Restore[model.Item],
-	model.ModelTypeTag:        dao.Restore[model.Tag],
-}
-
-var hardDeleteFuncs = map[string]func(tx *gorm.DB, uniqueFields map[string]interface{}) error{
-	model.ModelTypeCategory:   dao.HardDelete[model.Category],
-	model.ModelTypeCollection: dao.HardDelete[model.Collection],
-	model.ModelTypeField:      dao.HardDelete[model.Field],
-	model.ModelTypeItem:       dao.HardDelete[model.Item],
-	model.ModelTypeTag:        dao.HardDelete[model.Tag],
-}
-
-var softDeleteFuncs = map[string]func(tx *gorm.DB, uniqueFields map[string]interface{}) error{
-	model.ModelTypeCategory:   dao.SoftDelete[model.Category],
-	model.ModelTypeCollection: dao.SoftDelete[model.Collection],
-	model.ModelTypeField:      dao.SoftDelete[model.Field],
-	model.ModelTypeItem:       dao.SoftDelete[model.Item],
-	model.ModelTypeTag:        dao.SoftDelete[model.Tag],
-}
-
-var hardDeleteByFilterFuncs = map[string]func(tx *gorm.DB, filters []dao.Filter) error{
-	model.ModelTypeCategory:   dao.HardDeleteByFilter[model.Category],
-	model.ModelTypeCollection: dao.HardDeleteByFilter[model.Collection],
-	model.ModelTypeField:      dao.HardDeleteByFilter[model.Field],
-	model.ModelTypeItem:       dao.HardDeleteByFilter[model.Item],
-	model.ModelTypeTag:        dao.HardDeleteByFilter[model.Tag],
-	model.ModelTypeIFV:        dao.HardDeleteByFilter[model.ItemFieldValue],
-}
-
-func Restore(typ string, uniqueFields map[string]interface{}) error {
-	db := db.GetDB()
-	fn, ok := restoreFuncs[typ]
-	if !ok {
-		return e.ErrInvalidParams
-	}
-	return fn(db, uniqueFields)
-}
-
-func HardDelete(typ string, uniqueFields map[string]interface{}) error {
-	db := db.GetDB()
-	fn, ok := hardDeleteFuncs[typ]
-	if !ok {
-		return e.ErrInvalidParams
-	}
-	return fn(db, uniqueFields)
-}
-
-func SoftDelete(typ string, uniqueFields map[string]interface{}) error {
-	db := db.GetDB()
-	fn, ok := softDeleteFuncs[typ]
-	if !ok {
-		return e.ErrInvalidParams
-	}
-	return fn(db, uniqueFields)
+var DeleteByFilterFuncs = map[string]func(tx *gorm.DB, filters []dao.Filter, isSoftDelete bool) error{
+	model.ModelTypeCategory:   dao.DeleteByFilter[model.Category],
+	model.ModelTypeCollection: dao.DeleteByFilter[model.Collection],
+	model.ModelTypeField:      dao.DeleteByFilter[model.Field],
+	model.ModelTypeItem:       dao.DeleteByFilter[model.Item],
+	model.ModelTypeTag:        dao.DeleteByFilter[model.Tag],
+	model.ModelTypeIFV:        dao.DeleteByFilter[model.ItemFieldValue],
 }
 
 func ClearRecycleBin() error {
@@ -77,8 +25,8 @@ func ClearRecycleBin() error {
 			Where: "deleted_at is not null",
 		},
 	}
-	for _, fn := range hardDeleteByFilterFuncs {
-		err := fn(db, filters)
+	for _, fn := range DeleteByFilterFuncs {
+		err := fn(db, filters, false)
 		if err != nil {
 			return err
 		}

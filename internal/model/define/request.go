@@ -37,3 +37,9 @@ type CreateItemReq struct {
 	Title      string           `json:"title" form:"title" binding:"required"`
 	Values     []ItemFieldValue `json:"values" form:"values" binding:"required,dive"`
 }
+
+type UpdateItemReq struct {
+	ID     uint             `json:"id" form:"id" binding:"required,gt=0"`
+	Title  string           `json:"title" form:"title" binding:"required"`
+	Values []ItemFieldValue `json:"values" form:"values" binding:"required,dive"`
+}

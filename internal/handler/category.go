@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"collectify/internal/config"
 	"collectify/internal/dao"
 	"collectify/internal/db"
 	common "collectify/internal/model/common"
@@ -59,18 +58,26 @@ func DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	if config.GetConfig().RecycleBin.Enable {
-		err = service.SoftDelete(model.ModelTypeCategory, map[string]interface{}{"id": id})
-		if err != nil {
-			Fail(c, err)
-			return
-		}
-	} else {
-		err = service.HardDelete(model.ModelTypeCategory, map[string]interface{}{"id": id})
-		if err != nil {
-			Fail(c, err)
-			return
-		}
+	err = service.DeleteCategory(id)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func RestoreCategory(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = service.RestoreCategory(id)
+	if err != nil {
+		Fail(c, err)
+		return
 	}
 
 	Success(c)

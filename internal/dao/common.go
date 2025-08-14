@@ -17,7 +17,7 @@ type Filter struct {
 // filters: 查询时的附加条件，如排除当前记录、状态过滤等
 func DuplicateCheck[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, filters []Filter) (id uint, isDeleted bool, err error) {
 	var t T
-	query := tx.Model(&t).Where(uniqueFields)
+	query := tx.Unscoped().Model(&t).Where(uniqueFields)
 	for _, filter := range filters {
 		query = query.Where(filter.Where, filter.Args...)
 	}
@@ -31,6 +31,15 @@ func DuplicateCheck[T model.GormModel](tx *gorm.DB, uniqueFields map[string]inte
 	return t.GetID(), t.IsDeleted(), nil
 }
 
+func IsDeleted[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) (bool, error) {
+	var t T
+	err := tx.Unscoped().Model(&t).Where(uniqueFields).First(&t).Error
+	if err != nil {
+		return false, err
+	}
+	return t.IsDeleted(), nil
+}
+
 func Create[T model.GormModel](tx *gorm.DB, data *T) error {
 	err := tx.Create(data).Error
 	if err != nil {
@@ -39,25 +48,38 @@ func Create[T model.GormModel](tx *gorm.DB, data *T) error {
 	return nil
 }
 
-func SoftDelete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) error {
-	var t T
-	return tx.Model(&t).Where(uniqueFields).Delete(&t).Error
-}
-
 func Restore[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) error {
 	var t T
 	return tx.Unscoped().Model(&t).Where(uniqueFields).Update("deleted_at", nil).Error
 }
 
-func HardDelete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) error {
+func RestoreByFilter[T model.GormModel](tx *gorm.DB, filters []Filter) error {
 	var t T
-	return tx.Unscoped().Model(&t).Where(uniqueFields).Delete(&t).Error
+
+	query := tx.Unscoped().Model(&t)
+	for _, filter := range filters {
+		query = query.Where(filter.Where, filter.Args...)
+	}
+	return query.Update("deleted_at", nil).Error
 }
 
-func HardDeleteByFilter[T model.GormModel](tx *gorm.DB, filters []Filter) error {
+func Delete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}, isSoftDelete bool) error {
 	var t T
 
-	query := tx.Model(&t).Unscoped()
+	query := tx.Model(&t)
+	if !isSoftDelete {
+		query = query.Unscoped()
+	}
+	return query.Where(uniqueFields).Delete(&t).Error
+}
+
+func DeleteByFilter[T model.GormModel](tx *gorm.DB, filters []Filter, isSoftDelete bool) error {
+	var t T
+
+	query := tx.Model(&t)
+	if !isSoftDelete {
+		query = query.Unscoped()
+	}
 
 	for _, filter := range filters {
 		query = query.Where(filter.Where, filter.Args...)

@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"collectify/internal/config"
 	"collectify/internal/dao"
 	"collectify/internal/db"
-	define "collectify/internal/model/define"
 	model "collectify/internal/model/db"
+	define "collectify/internal/model/define"
 	"collectify/internal/pkg/e"
 	"collectify/internal/service"
 
@@ -61,20 +60,27 @@ func DeleteField(c *gin.Context) {
 		return
 	}
 
-	if config.GetConfig().RecycleBin.Enable {
-		err = service.SoftDelete(model.ModelTypeField, map[string]interface{}{"id": id})
-		if err != nil {
-			Fail(c, err)
-			return
-		}
-	} else {
-		err = service.HardDelete(model.ModelTypeField, map[string]interface{}{"id": id})
-		if err != nil {
-			Fail(c, err)
-			return
-		}
+	err = service.DeleteField(id)
+	if err != nil {
+		Fail(c, err)
+		return
 	}
 
 	Success(c)
 }
 
+func RestoreField(c *gin.Context) {
+	id, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = service.RestoreField(id)
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
