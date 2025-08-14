@@ -4,6 +4,7 @@ import (
 	"collectify/internal/config"
 	"collectify/internal/dao"
 	"collectify/internal/db"
+	define "collectify/internal/model/define"
 	model "collectify/internal/model/db"
 	"collectify/internal/pkg/e"
 	"collectify/internal/service"
@@ -12,7 +13,7 @@ import (
 )
 
 func CreateField(c *gin.Context) {
-	var req CreateFieldReq
+	var req define.CreateFieldReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
 		return
@@ -44,7 +45,7 @@ func CreateField(c *gin.Context) {
 		Required:   req.Required,
 	}
 
-	_, err = dao.Create(db.GetDB(), field)
+	err = dao.Create(db.GetDB(), field)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -76,3 +77,4 @@ func DeleteField(c *gin.Context) {
 
 	Success(c)
 }
+

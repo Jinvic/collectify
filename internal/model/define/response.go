@@ -1,4 +1,4 @@
-package handler
+package define
 
 type SearchResp struct {
 	List  interface{} `json:"list"`

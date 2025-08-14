@@ -31,12 +31,12 @@ func DuplicateCheck[T model.GormModel](tx *gorm.DB, uniqueFields map[string]inte
 	return t.GetID(), t.IsDeleted(), nil
 }
 
-func Create[T model.GormModel](tx *gorm.DB, data *T) (*T, error) {
+func Create[T model.GormModel](tx *gorm.DB, data *T) error {
 	err := tx.Create(data).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return data, nil
+	return nil
 }
 
 func SoftDelete[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{}) error {

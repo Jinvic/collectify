@@ -6,6 +6,7 @@ import (
 	"collectify/internal/db"
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
+	define "collectify/internal/model/define"
 	"collectify/internal/pkg/e"
 	"collectify/internal/service"
 	"errors"
@@ -16,7 +17,7 @@ import (
 )
 
 func CreateCategory(c *gin.Context) {
-	var req CreateCategoryReq
+	var req define.CreateCategoryReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
 		return
@@ -42,7 +43,7 @@ func CreateCategory(c *gin.Context) {
 	category := &model.Category{
 		Name: req.Name,
 	}
-	_, err = dao.Create(db.GetDB(), category)
+	err = dao.Create(db.GetDB(), category)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -82,7 +83,7 @@ func RenameCategory(c *gin.Context) {
 		return
 	}
 
-	var req RenameCategoryReq
+	var req define.RenameCategoryReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
 		return
@@ -130,7 +131,7 @@ func GetCategory(c *gin.Context) {
 	}
 
 	uniqueFields := map[string]interface{}{"id": id}
-	preloads := []string{model.Field{}.TableName()}
+	preloads := []string{"Fields"}
 	category, err := dao.Get[model.Category](db.GetDB(), uniqueFields, preloads...)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -145,7 +146,7 @@ func GetCategory(c *gin.Context) {
 }
 
 func SearchCategory(c *gin.Context) {
-	var req SearchReq
+	var req define.SearchReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
 		return
@@ -172,7 +173,7 @@ func SearchCategory(c *gin.Context) {
 		return
 	}
 
-	SuccessWithData(c, SearchResp{
+	SuccessWithData(c, define.SearchResp{
 		List:  categories,
 		Total: total,
 	})

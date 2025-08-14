@@ -1,13 +1,14 @@
 package handler
 
 import (
+	define "collectify/internal/model/define"
 	"collectify/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Restore(c *gin.Context) {
-	var req DeletedReq
+	var req define.DeletedReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
 		return
@@ -28,7 +29,7 @@ func Restore(c *gin.Context) {
 }
 
 func HardDelete(c *gin.Context) {
-	var req DeletedReq
+	var req define.DeletedReq
 	if err := c.ShouldBind(&req); err != nil {
 		Fail(c, err)
 		return

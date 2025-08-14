@@ -13,6 +13,13 @@ const (
 	FieldTypeDatetime
 )
 
+var FieldTypeNames = map[int]string{
+	FieldTypeString:   "string",
+	FieldTypeInt:      "int",
+	FieldTypeBool:     "bool",
+	FieldTypeDatetime: "datetime",
+}
+
 // Field 字段
 type Field struct {
 	gorm.Model
@@ -50,14 +57,14 @@ type ItemFieldValue struct {
 	Field Field `gorm:"foreignKey:FieldID"`
 }
 
-func (i *ItemFieldValue) TableName() string {
+func (i ItemFieldValue) TableName() string {
 	return "item_field_values"
 }
 
-func (i *ItemFieldValue) GetID() uint {
+func (i ItemFieldValue) GetID() uint {
 	return i.ID
 }
 
-func (i *ItemFieldValue) IsDeleted() bool {
+func (i ItemFieldValue) IsDeleted() bool {
 	return i.DeletedAt.Valid
 }

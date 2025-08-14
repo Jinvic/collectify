@@ -1,4 +1,4 @@
-package handler
+package define
 
 type DeletedReq struct {
 	List []DeletedReqItem `json:"list" form:"list" binding:"required,dive"`
@@ -30,4 +30,10 @@ type CreateFieldReq struct {
 	Type       int    `json:"type" form:"type" binding:"required,oneof=1 2 3 4"`
 	IsArray    bool   `json:"is_array" form:"is_array" binding:"required"`
 	Required   bool   `json:"required" form:"required" binding:"required"`
+}
+
+type CreateItemReq struct {
+	CategoryID uint             `json:"category_id" form:"category_id" binding:"required,gt=0"`
+	Title      string           `json:"title" form:"title" binding:"required"`
+	Values     []ItemFieldValue `json:"values" form:"values" binding:"required,dive"`
 }

@@ -11,4 +11,5 @@ const (
 	ModelTypeField      = "field"
 	ModelTypeItem       = "item"
 	ModelTypeTag        = "tag"
+	ModelTypeIFV        = "item_field_value"
 )

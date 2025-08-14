@@ -1,4 +1,4 @@
-package model
+package common
 
 type Pagination struct {
 	Disable bool `json:"disable" form:"disable"` // 是否禁用分页
