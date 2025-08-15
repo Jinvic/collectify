@@ -119,8 +119,13 @@ func SearchItems(c *gin.Context) {
 		return
 	}
 
+	itemDetails := make([]define.ItemDetail, len(items))
+	for i, item := range items {
+		itemDetails[i].FromDB(&item)
+	}
+
 	SuccessWithData(c, define.SearchResp{
-		List:  items,
+		List:  itemDetails,
 		Total: total,
 	})
 }

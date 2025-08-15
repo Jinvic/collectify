@@ -31,6 +31,7 @@ func InitDB(cfg *config.Config) error {
 		&model.Field{},
 		&model.Item{},
 		&model.Tag{},
+		&model.ItemFieldValue{},
 	)
 	return err
 }

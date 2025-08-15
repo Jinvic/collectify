@@ -31,18 +31,18 @@ type CreateFieldReq struct {
 	CategoryID uint   `json:"category_id" form:"category_id" binding:"required,gt=0"`
 	Name       string `json:"name" form:"name" binding:"required"`
 	Type       int    `json:"type" form:"type" binding:"required,oneof=1 2 3 4"`
-	IsArray    bool   `json:"is_array" form:"is_array" binding:"required"`
-	Required   bool   `json:"required" form:"required" binding:"required"`
+	IsArray    bool   `json:"is_array" form:"is_array"`
+	Required   bool   `json:"required" form:"required"`
 }
 
 type CreateItemReq struct {
-	CategoryID uint             `json:"category_id" form:"category_id" binding:"required,gt=0"`
-	Item       Item             `json:"item" form:"item" binding:"required"`
+	CategoryID uint `json:"category_id" form:"category_id" binding:"required,gt=0"`
+	Item       Item `json:"item" form:"item" binding:"required"`
 }
 
 type UpdateItemReq struct {
-	ID          uint             `json:"id" form:"id" binding:"required,gt=0"`
-	Item       Item             `json:"item" form:"item" binding:"required"`
+	ID   uint `json:"id" form:"id" binding:"required,gt=0"`
+	Item Item `json:"item" form:"item" binding:"required"`
 }
 
 type SearchItemsReq struct {

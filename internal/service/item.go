@@ -233,12 +233,20 @@ func SearchItems(categoryID uint, title string, tagIDs []uint, collectionIDs []u
 	// 预加载关联表
 	joins := []dao.Join{
 		{
-			Table: "tags",
+			Table: "item_tags",
 			On:    "items.id = item_tags.item_id",
 		},
 		{
-			Table: "collections",
+			Table: "tags",
+			On:    "item_tags.tag_id = tags.id",
+		},
+		{
+			Table: "collection_items",
 			On:    "items.id = collection_items.item_id",
+		},
+		{
+			Table: "collections",
+			On:    "collection_items.collection_id = collections.id",
 		},
 		{
 			Table: "item_field_values",
@@ -287,6 +295,7 @@ func SearchItems(categoryID uint, title string, tagIDs []uint, collectionIDs []u
 		"Tags",
 		"Collections",
 		"Values",
+		"Values.Field",
 	}
 
 	var items []model.Item
@@ -318,7 +327,7 @@ func SearchItems(categoryID uint, title string, tagIDs []uint, collectionIDs []u
 		}
 
 		// 先查询出所有符合条件的收藏品ID，再预加载关联表，避免笛卡尔积查询
-		itemIDs, err := dao.Pluck[model.ItemFieldValue, uint](tx, "item.id", joins, filters, true)
+		itemIDs, err := dao.Pluck[model.Item, uint](tx, "items.id", joins, filters, true)
 		if err != nil {
 			return err
 		}

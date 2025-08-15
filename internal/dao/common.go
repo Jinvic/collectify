@@ -4,6 +4,7 @@ import (
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -149,7 +150,8 @@ func Pluck[T model.GormModel, R any](tx *gorm.DB, column string, joins []Join, f
 	var r []R
 	query := tx.Model(&t)
 	for _, join := range joins {
-		query = query.Joins(join.On)
+		joinStr := fmt.Sprintf("LEFT JOIN %s ON %s", join.Table, join.On)
+		query = query.Joins(joinStr)
 	}
 	for _, filter := range filters {
 		query = query.Where(filter.Where, filter.Args...)
