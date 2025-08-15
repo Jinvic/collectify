@@ -25,6 +25,10 @@ func InitDB(cfg *config.Config) error {
 		return fmt.Errorf("unsupported database type: %s", cfg.Database.Type)
 	}
 
+	if cfg.Server.Mode == "debug" {
+		db = db.Debug()
+	}
+
 	err := db.AutoMigrate(
 		&model.Category{},
 		&model.Collection{},

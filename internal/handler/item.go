@@ -138,12 +138,15 @@ func GetItem(c *gin.Context) {
 	}
 
 	uniqueFields := map[string]interface{}{"id": id}
-	preloads := []string{"Category", "Tags", "Collections", "Values"}
+	preloads := []string{"Category", "Tags", "Collections", "Values", "Values.Field"}
 	item, err := dao.Get[model.Item](db.GetDB(), uniqueFields, preloads...)
 	if err != nil {
 		Fail(c, err)
 		return
 	}
 
-	SuccessWithData(c, item)
+	itemDetail := define.ItemDetail{}
+	itemDetail.FromDB(&item)
+
+	SuccessWithData(c, itemDetail)
 }

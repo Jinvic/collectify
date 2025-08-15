@@ -74,6 +74,12 @@ func GetConfig() *Config {
 	return config
 }
 
+// SetConfig 设置配置
+// WARNING: 仅用于测试，不要在生产环境中使用
+func SetConfig(cfg *Config) {
+	config = cfg
+}
+
 // setDefaultFromStruct 将结构体中的默认值设置到 Viper 中
 func setDefaultFromStruct(cfg interface{}) {
 	val := reflect.ValueOf(cfg).Elem()
