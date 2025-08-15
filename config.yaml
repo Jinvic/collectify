@@ -5,4 +5,4 @@ server:
   port: 8080
   mode: debug
 recycle_bin:
-  enable: true
+  enable: false

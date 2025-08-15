@@ -1,5 +1,5 @@
 // src/services/itemService.js
-import apiClient from '../api';
+import apiClient from './apiClient';
 
 export const itemService = {
   list: async (params = {}) => {
@@ -9,7 +9,7 @@ export const itemService = {
       const response = await apiClient.get('/item/list', { params: defaultParams });
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch items: ${error.message}`);
+      throw new Error(`Failed to fetch items: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -18,7 +18,7 @@ export const itemService = {
       const response = await apiClient.post('/item/search', searchData);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to search items: ${error.message}`);
+      throw new Error(`Failed to search items: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -27,7 +27,7 @@ export const itemService = {
       const response = await apiClient.get(`/item/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch item ${id}: ${error.message}`);
+      throw new Error(`Failed to fetch item ${id}: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -36,7 +36,7 @@ export const itemService = {
       const response = await apiClient.post('/item', itemData);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create item: ${error.message}`);
+      throw new Error(`Failed to create item: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -45,7 +45,7 @@ export const itemService = {
       const response = await apiClient.put(`/item/${id}`, itemData);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to update item ${id}: ${error.message}`);
+      throw new Error(`Failed to update item ${id}: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -54,7 +54,7 @@ export const itemService = {
       const response = await apiClient.delete(`/item/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to delete item ${id}: ${error.message}`);
+      throw new Error(`Failed to delete item ${id}: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -63,7 +63,7 @@ export const itemService = {
       const response = await apiClient.post(`/item/${id}/restore`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to restore item ${id}: ${error.message}`);
+      throw new Error(`Failed to restore item ${id}: ${error.response?.data?.msg || error.message}`);
     }
   },
   // Add more methods for other item operations as needed

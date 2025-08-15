@@ -1,50 +1,71 @@
 // src/hooks/useItems.js
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { itemService } from '../services/itemService';
 
-export const useItems = (initialParams = {}) => {
-  const [items, setItems] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [params, setParams] = useState({ page: 1, page_size: 10, ...initialParams });
+// Custom hook for fetching basic item list
+export const useBasicItems = (params = {}) => {
+  return useQuery({
+    queryKey: ['basicItems', params], // Key includes params for caching different queries
+    queryFn: () => itemService.list(params),
+  });
+};
 
-  const fetchItems = async (fetchParams = params) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await itemService.list(fetchParams);
-      setItems(data.data?.list || []);
-      setTotal(data.data?.total || 0);
-    } catch (err) {
-      console.error("Hook: Failed to fetch items:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+// Custom hook for searching items
+export const useSearchItems = (searchParams = {}) => {
+  return useQuery({
+    queryKey: ['searchItems', searchParams],
+    queryFn: () => itemService.search(searchParams),
+    // enabled: Object.keys(searchParams).length > 0, // Optional: only run if params are provided
+  });
+};
 
-  // Fetch items when params change
-  useEffect(() => {
-    fetchItems(params);
-  }, [params]);
+// Custom hook for fetching a single item
+export const useItem = (id) => {
+  return useQuery({
+    queryKey: ['item', id],
+    queryFn: () => itemService.get(id),
+    enabled: !!id,
+  });
+};
 
-  const searchItems = async (searchData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await itemService.search(searchData);
-      setItems(data.data?.list || []);
-      setTotal(data.data?.total || 0);
-      return data;
-    } catch (err) {
-      console.error("Hook: Failed to search items:", err);
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+// Custom hook for creating an item
+export const useCreateItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: itemService.create,
+    onSuccess: () => {
+      // Invalidate queries that might be affected
+      queryClient.invalidateQueries({ queryKey: ['basicItems'] });
+      queryClient.invalidateQueries({ queryKey: ['searchItems'] });
+    },
+  });
+};
 
-  return { items, total, loading, error, fetchItems, searchItems, setParams, params };
+// Custom hook for updating an item
+export const useUpdateItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => itemService.update(id, data),
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch the specific item
+      queryClient.invalidateQueries({ queryKey: ['item', variables.id] });
+      // Invalidate list queries as the item might have changed position or data
+      queryClient.invalidateQueries({ queryKey: ['basicItems'] });
+      queryClient.invalidateQueries({ queryKey: ['searchItems'] });
+    },
+  });
+};
+
+// Custom hook for deleting an item
+export const useDeleteItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: itemService.delete,
+    onSuccess: () => {
+      // Invalidate list queries
+      queryClient.invalidateQueries({ queryKey: ['basicItems'] });
+      queryClient.invalidateQueries({ queryKey: ['searchItems'] });
+      // Note: The specific item query will become stale, which is usually fine
+    },
+  });
 };

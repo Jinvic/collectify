@@ -1,47 +1,60 @@
 // src/hooks/useCategories.js
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoryService } from '../services/categoryService';
 
+// Custom hook for fetching categories
 export const useCategories = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  return useQuery({
+    queryKey: ['categories'], // Unique key for the query
+    queryFn: categoryService.list,
+    // Initial data can be provided if needed, e.g., from a placeholder or cache
+    // initialData: { data: { list: [] } },
+  });
+};
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await categoryService.list();
-      setCategories(data.data?.list || []);
-    } catch (err) {
-      console.error("Hook: Failed to fetch categories:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+// Custom hook for creating a category
+export const useCreateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: categoryService.create,
+    onSuccess: () => {
+      // Invalidate and refetch the categories list query
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+};
 
-  const createCategory = async (categoryData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await categoryService.create(categoryData);
-      // Refetch categories after creation
-      await fetchCategories();
-      return data;
-    } catch (err) {
-      console.error("Hook: Failed to create category:", err);
-      setError(err.message);
-      throw err; // Re-throw so caller can handle
-    } finally {
-      setLoading(false);
-    }
-  };
+// Custom hook for renaming a category
+export const useRenameCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => categoryService.rename(id, data),
+    onSuccess: () => {
+      // Invalidate and refetch the categories list query
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      // Also invalidate any single category queries if they exist
+      // queryClient.invalidateQueries({ queryKey: ['category'] }); 
+    },
+  });
+};
 
-  // Fetch categories on initial load
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+// Custom hook for deleting a category
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: categoryService.delete,
+    onSuccess: () => {
+      // Invalidate and refetch the categories list query
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+};
 
-  return { categories, loading, error, fetchCategories, createCategory };
+// Custom hook for fetching a single category (with fields)
+export const useCategory = (id) => {
+  return useQuery({
+    queryKey: ['category', id], // Unique key includes the ID
+    queryFn: () => categoryService.get(id),
+    enabled: !!id, // Only run the query if id is truthy
+  });
 };

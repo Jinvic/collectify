@@ -1,5 +1,5 @@
 // src/services/categoryService.js
-import apiClient from '../api';
+import apiClient from './apiClient';
 
 export const categoryService = {
   list: async () => {
@@ -7,7 +7,7 @@ export const categoryService = {
       const response = await apiClient.get('/category/list');
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch categories: ${error.message}`);
+      throw new Error(`Failed to fetch categories: ${error.response?.data?.msg || error.message}`);
     }
   },
 
@@ -16,12 +16,35 @@ export const categoryService = {
       const response = await apiClient.post('/category', categoryData);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create category: ${error.message}`);
+      throw new Error(`Failed to create category: ${error.response?.data?.msg || error.message}`);
     }
   },
 
-  // Add more methods for update, delete, etc. as needed
-  // get: async (id) => { ... }
-  // update: async (id, categoryData) => { ... }
-  // delete: async (id) => { ... }
+  rename: async (id, categoryData) => {
+    try {
+      const response = await apiClient.patch(`/category/${id}`, categoryData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to rename category: ${error.response?.data?.msg || error.message}`);
+    }
+  },
+
+  delete: async (id) => {
+    try {
+      const response = await apiClient.delete(`/category/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to delete category: ${error.response?.data?.msg || error.message}`);
+    }
+  },
+
+  // Get a single category with its fields
+  get: async (id) => {
+    try {
+      const response = await apiClient.get(`/category/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch category: ${error.response?.data?.msg || error.message}`);
+    }
+  },
 };
