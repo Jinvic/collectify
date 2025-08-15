@@ -94,8 +94,13 @@ func ListItems(c *gin.Context) {
 		return
 	}
 
+	itemInfos := make([]define.Item, len(items))
+	for i, item := range items {
+		itemInfos[i].FromDB(&item)
+	}
+
 	SuccessWithData(c, define.SearchResp{
-		List:  items,
+		List:  itemInfos,
 		Total: total,
 	})
 }

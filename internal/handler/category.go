@@ -148,7 +148,10 @@ func GetCategory(c *gin.Context) {
 		return
 	}
 
-	SuccessWithData(c, category)
+	categoryInfo := define.Category{}
+	categoryInfo.FromDB(&category)
+
+	SuccessWithData(c, categoryInfo)
 }
 
 func ListCategory(c *gin.Context) {
@@ -182,8 +185,13 @@ func ListCategory(c *gin.Context) {
 		return
 	}
 
+	categoryInfos := make([]define.Category, len(categories))
+	for idx, category := range categories {
+		categoryInfos[idx].FromDB(&category)
+	}
+
 	SuccessWithData(c, define.SearchResp{
-		List:  categories,
+		List:  categoryInfos,
 		Total: total,
 	})
 }
