@@ -9,9 +9,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,6 +30,47 @@ func DoWeb() {
 
 	// 初始化路由
 	r := router.InitRouter()
+
+	// 配置 CORS for development
+	// In production, you might want to restrict this more or remove it
+	// if the frontend is served from the same origin.
+	// This should ideally be configurable via config file.
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:3000"} // React dev server
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	r.Use(cors.New(corsConfig))
+
+	// Serve frontend static files
+	// Check if the frontend build directory exists
+	frontendBuildPath := "./web/build"
+	if _, err := os.Stat(frontendBuildPath); err == nil {
+		// Serve static files (CSS, JS, images)
+		r.Static("/static", filepath.Join(frontendBuildPath, "static"))
+
+		// Serve favicon
+		r.StaticFile("/favicon.ico", filepath.Join(frontendBuildPath, "favicon.ico"))
+
+		// Catch-all handler for SPA (Single Page Application)
+		// This will serve index.html for any route that is not an API call or a static asset.
+		// This allows React Router to handle routing on the client side.
+		r.NoRoute(func(c *gin.Context) {
+			// If the request is for an API or a known static asset, return 404
+			if strings.HasPrefix(c.Request.URL.Path, "/api/") ||
+				strings.HasPrefix(c.Request.URL.Path, "/static/") ||
+				c.Request.URL.Path == "/favicon.ico" {
+				c.AbortWithStatus(404)
+				return
+			}
+			// For all other routes, serve the React index.html file.
+			c.File(filepath.Join(frontendBuildPath, "index.html"))
+		})
+	} else {
+		// If frontend is not built, log a message
+		log.Printf("Frontend build directory '%s' not found. Serving API only.\n", frontendBuildPath)
+		// You might want to serve a simple API-only page or just let the API routes handle everything.
+		// For now, we'll just log and let the API routes function normally.
+	}
 
 	// 创建 HTTP Server
 	srv := &http.Server{

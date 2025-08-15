@@ -15,8 +15,8 @@ var rootCmd = &cobra.Command{
 	From web-based interfaces to text user interfaces (TUI) and graphical user interfaces (GUI), 
 	Collectify provides multiple ways to interact with your data.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Default to TUI
-		cli.DoTui()
+		// Default to Web
+		cli.DoWeb()
 	},
 }
 

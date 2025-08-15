@@ -9,14 +9,21 @@ import (
 func InitRouter() *gin.Engine {
 	router := gin.Default()
 
-	initCategoryRouter(router)
-	initFieldRouter(router)
-	initItemRouter(router)
+	// 将所有 API 路由分组到 /api 路径下
+	api := router.Group("/api")
+	{
+		initCategoryRouter(api)
+		initFieldRouter(api)
+		initItemRouter(api)
+	}
+
+	// Serve frontend static files
+	// This part is handled in internal/cli/web.go
 
 	return router
 }
 
-func initCategoryRouter(router *gin.Engine) {
+func initCategoryRouter(router *gin.RouterGroup) {
 	category := router.Group("/category")
 	{
 		category.POST("", handler.CreateCategory)
@@ -28,7 +35,7 @@ func initCategoryRouter(router *gin.Engine) {
 	}
 }
 
-func initFieldRouter(router *gin.Engine) {
+func initFieldRouter(router *gin.RouterGroup) {
 	field := router.Group("/field")
 	{
 		field.POST("", handler.CreateField)
@@ -37,7 +44,7 @@ func initFieldRouter(router *gin.Engine) {
 	}
 }
 
-func initItemRouter(router *gin.Engine) {
+func initItemRouter(router *gin.RouterGroup) {
 	item := router.Group("/item")
 	{
 		item.POST("", handler.CreateItem)

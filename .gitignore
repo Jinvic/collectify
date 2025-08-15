@@ -1,4 +1,37 @@
-*.db
+// .gitignore
 
-/.vscode
-/.cursor
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories
+node_modules/
+
+# Go workspace file
+go.work
+
+# IDEs
+.vscode/
+.idea/
+
+# Frontend build output
+web/build/
+
+# Environment files
+.env
+
+# Log files
+*.log
+
+# Database files (if using file-based DB like SQLite in development outside of :memory:)
+# Uncomment if you want to ignore the default SQLite file, but be careful in production.
+*.db
