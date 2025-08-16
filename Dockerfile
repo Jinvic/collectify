@@ -1,80 +1,46 @@
-# Use a multi-stage build to optimize the image size
-# Stage 1: Build the React frontend
+# Stage 1：构建前端
 FROM node:18-alpine AS frontend-builder
-
 WORKDIR /app
-
-# Copy package.json and pnpm-lock.yaml for dependency installation
-# This step is cached if these files haven't changed
+# 复制前端依赖文件
 COPY web/package.json web/pnpm-lock.yaml ./web/
-
-# Install pnpm globally and then install frontend dependencies
+# 安装pnpm及前端依赖
 RUN npm install -g pnpm && \
     cd web && \
     pnpm install --frozen-lockfile
-
-# Copy the rest of the frontend source code
+# 复制前端源码并构建
 COPY web/ ./web/
-
-# Build the React application
 RUN cd web && pnpm run build
 
-# Stage 2: Build the Go backend
-# Use the official Golang Alpine image for a smaller footprint
+# Stage 2：构建后端
 FROM golang:1.23-alpine AS backend-builder
-
 WORKDIR /app
-
-# Install Git (needed by Go modules)
-# Note: We do NOT install gcc or musl-dev anymore because github.com/glebarez/sqlite is pure Go
+# 安装Git（Go模块需要）
 RUN apk add --no-cache git
-
-# Copy go mod and sum files for dependency download
-# This step is cached if these files haven't changed
+# 复制Go模块文件并下载依赖
 COPY go.mod go.sum ./
-
-# Download Go dependencies
 RUN go mod download
-
-# Copy the source code
+# 复制源码并构建
 COPY . .
-
-# Build the Go binary.
-# -ldflags="-w -s" strips debug symbols to reduce binary size
-# Explicitly set CGO_ENABLED=0 to ensure a pure Go build, leveraging the glebarez/sqlite driver's advantage.
-# GOOS=linux ensures the binary is built for the Linux target OS inside the container.
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o collectify .
 
-# Stage 3: Final stage - Create the minimal runtime image
+# Stage 3：生成最终镜像
 FROM alpine:latest
-
 WORKDIR /root/
-
-# Install ca-certificates for HTTPS requests (if needed by the app in the future)
+# 安装CA证书
 RUN apk --no-cache add ca-certificates
-
-# Create a non-root user for security
+# 创建非root用户
 RUN adduser -D -s /bin/sh collectify-user
-
-# Copy the pre-built binary file from the backend-builder stage
+# 复制构建好的前后端文件
 COPY --from=backend-builder /app/collectify .
-
-# Copy the built frontend static files from the frontend-builder stage
-# The Go backend is configured to serve files from ./web/build
 COPY --from=frontend-builder /app/web/build ./web/build
-
-# Make the binary executable
+# 创建data目录
+RUN mkdir -p ./data
+# 设置文件权限
 RUN chmod +x ./collectify
-
-# Change ownership of the binary and static files to the non-root user
-RUN chown -R collectify-user:collectify-user ./collectify ./web/build
-
-# Switch to the non-root user
+RUN chown -R collectify-user:collectify-user ./collectify ./web/build ./data
+# 切换用户并暴露端口
 USER collectify-user
-
-# Expose port 8080 to the outside world
 EXPOSE 8080
-
-# Command to run the executable
+# 启动命令
 ENTRYPOINT ["./collectify"]
 CMD ["web"]

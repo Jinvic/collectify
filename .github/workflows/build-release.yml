@@ -53,13 +53,9 @@ jobs:
 
       - name: Build ${{ matrix.output }}
         run: |
-          go build \
-            -ldflags "-s -w -X main.version=${{ github.ref_name }} -X main.commit=${{ github.sha:0:7 }}" \
-            -o "dist/${{ matrix.output }}" \
-            .
-        # 注意：Windows 下使用 .\main.go 或 .，Linux 下使用 .
+          go build -ldflags="-s -w" -o "dist/${{ matrix.output }}" .
 
-      - name: Archive artifact
+      - name: Archive artifact (Linux)
         run: |
           mkdir -p dist
           zip -j "dist/${{ matrix.output }}.zip" "dist/${{ matrix.output }}"
@@ -102,7 +98,7 @@ jobs:
           name: "Release ${{ github.ref_name }}"
           body: |
             Thanks for using Collectify!
-            
+
             This release includes binaries for Linux and Windows (amd64/arm64).
           files: release-assets/**/*
           draft: false
