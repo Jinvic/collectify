@@ -14,6 +14,7 @@ fmt:
 alias b := build
 alias bf := build-frontend
 alias bb := build-backend
+alias db := docker-build
 
 build:
     cd web | pnpm run build
@@ -24,3 +25,6 @@ build-frontend:
 
 build-backend:
     go build -o ./collectify.exe .
+
+docker-build:
+    docker build -t collectify .
