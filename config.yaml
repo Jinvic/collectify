@@ -1,8 +1,0 @@
-database:
-  type: sqlite
-  dsn: collectify.db
-server:
-  port: 8080
-  mode: debug
-recycle_bin:
-  enable: false
