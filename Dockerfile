@@ -34,10 +34,12 @@ RUN adduser -D -s /bin/sh collectify-user
 COPY --from=backend-builder /app/collectify .
 COPY --from=frontend-builder /app/web/build ./web/build
 # 创建data目录
-RUN mkdir -p ./data
+RUN mkdir -p ./data && \
+    chown -R collectify-user:collectify-user ./data && \
+    chmod 755 ./data
 # 设置文件权限
 RUN chmod +x ./collectify
-RUN chown -R collectify-user:collectify-user ./collectify ./web/build ./data
+RUN chown -R collectify-user:collectify-user ./
 # 切换用户并暴露端口
 USER collectify-user
 EXPOSE 8080
