@@ -25,7 +25,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o 
 
 # Stage 3：生成最终镜像
 FROM alpine:latest
-WORKDIR /root/
+WORKDIR /app
 # 安装CA证书
 RUN apk --no-cache add ca-certificates
 # 创建非root用户
