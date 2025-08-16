@@ -1,0 +1,111 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # 语义化版本标签触发发布
+
+jobs:
+  # ==============================
+  # 构建所有平台和架构
+  # ==============================
+  build:
+    name: Build ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            arch: amd64
+            ext: .exe
+            output: collectify-windows-amd64.exe
+          - os: windows-latest
+            arch: arm64
+            ext: .exe
+            output: collectify-windows-arm64.exe
+          - os: ubuntu-latest
+            arch: amd64
+            ext: ""
+            output: collectify-linux-amd64
+          - os: ubuntu-latest
+            arch: arm64
+            ext: ""
+            output: collectify-linux-arm64
+
+    env:
+      GOOS: ${{ startsWith(matrix.os, 'windows') && 'windows' || 'linux' }}
+      GOARCH: ${{ matrix.arch }}
+      CGO_ENABLED: 0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.0'
+          cache: true  # 启用 go mod 缓存
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Build ${{ matrix.output }}
+        run: |
+          go build \
+            -ldflags "-s -w -X main.version=${{ github.ref_name }} -X main.commit=${{ github.sha:0:7 }}" \
+            -o "dist/${{ matrix.output }}" \
+            .
+        # 注意：Windows 下使用 .\main.go 或 .，Linux 下使用 .
+
+      - name: Archive artifact
+        run: |
+          mkdir -p dist
+          zip -j "dist/${{ matrix.output }}.zip" "dist/${{ matrix.output }}"
+        shell: bash
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      - name: Archive artifact (Windows)
+        run: |
+          Compress-Archive -Path "dist/${{ matrix.output }}" -DestinationPath "dist/${{ matrix.output }}.zip"
+        if: ${{ matrix.os == 'windows-latest' }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output }}.zip
+          path: dist/${{ matrix.output }}.zip
+
+  # ==============================
+  # 发布为 GitHub Release
+  # ==============================
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 允许创建 Release
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: List files
+        run: ls -R release-assets/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: |
+            Thanks for using Collectify!
+            
+            This release includes binaries for Linux and Windows (amd64/arm64).
+          files: release-assets/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}

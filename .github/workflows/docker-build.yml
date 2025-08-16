@@ -1,0 +1,67 @@
+name: Build And Upload Image
+on:
+  push:
+    branches:
+      - 'cicd'           # 测试分支，打 test 标签
+    tags:
+      - 'v*'             # 所有以 v 开头的 tag，如 v1.0.0, v1.2.3
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Custom image tag (e.g. test, latest, v1.2.3)'
+        required: false
+        default: 'test'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER_NAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Determine Image Tag
+        run: |
+          # 优先使用 workflow_dispatch 输入
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+            echo "VERSION=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+          # 如果是 tag 触发
+          elif [[ ${{ github.ref }} == refs/tags/* ]]; then
+            TAG_NAME=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
+            echo "IMAGE_TAG=${TAG_NAME}" >> $GITHUB_ENV
+            echo "VERSION=${TAG_NAME}" >> $GITHUB_ENV
+          # 如果是 cicd 分支
+          elif [ "${{ github.ref }}" == "refs/heads/cicd" ]; then
+            echo "IMAGE_TAG=test" >> $GITHUB_ENV
+            echo "VERSION=test" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=unknown" >> $GITHUB_ENV
+            echo "VERSION=unknown" >> $GITHUB_ENV
+          fi
+          echo "COMMIT_ID=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v6 
+        with:
+          push: true
+          context: .
+          platforms: |
+            linux/amd64
+            linux/arm64
+          tags: |
+            ${{ secrets.DOCKER_USER_NAME }}/collectify:${{ env.IMAGE_TAG }}
+          build-args: |
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
