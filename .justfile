@@ -1,5 +1,4 @@
 set shell := ["powershell.exe", "-c"]
-set dotenv-load
 
 path := "cmd/... internal/..."
 
@@ -12,6 +11,16 @@ lint:
 fmt:
     golangci-lint fmt {{path}}
 
-# show version [golangci-lint required]
-version:
-    golangci-lint --version
+alias b := build
+alias bf := build-frontend
+alias bb := build-backend
+
+build:
+    cd web | pnpm run build
+    go build -o ./collectify.exe .
+
+build-frontend:
+    cd web | pnpm run build
+
+build-backend:
+    go build -o ./collectify.exe .

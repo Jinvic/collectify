@@ -12,24 +12,25 @@
 
 ### 后端
 
-1.  **安装 Go**: 确保你已安装 Go 1.23 或更高版本。
-2.  **获取依赖**: 在项目根目录下运行 `go mod tidy`。
-3.  **运行后端**:
-    *   开发模式: `go run main.go` (默认监听 :8080)。
-    *   或构建后运行: `go build -o collectify .` 然后 `./collectify`。
+1. **安装 Go**: 确保你已安装 Go 1.23 或更高版本。
+2. **获取依赖**: 在项目根目录下运行 `go mod tidy`。
+3. **运行后端**:
+    * 开发模式: `go run main.go` (默认监听 :8080)。
+    * 或构建后运行: `go build -o collectify .` 然后 `./collectify` (Linux/macOS) 或 `collectify.exe` (Windows)。
 
 ### 前端 (Web UI)
 
 前端使用 React 构建，位于 `web` 目录。
 
-1.  **安装 Node.js**: 确保你已安装 Node.js (建议 LTS 版本)。
-2.  **安装前端依赖**: 在 `web` 目录下运行 `npm install`。
-3.  **开发**:
-    *   启动前端开发服务器: 在 `web` 目录下运行 `npm start`。这将在 `http://localhost:3000` 启动一个热重载的开发服务器。它通过 `package.json` 中的 `proxy` 设置代理 API 请求到后端 (`http://localhost:8080`)。
-    *   同时确保后端服务 (`go run main.go`) 正在运行。
-4.  **构建**:
-    *   构建生产版本: 在 `web` 目录下运行 `npm run build`。这会将所有静态资源生成到 `web/build` 目录。
-    *   构建后端时，它会自动检测 `web/build` 目录并提供这些静态文件，使得应用可以作为一个整体部署。
+1. **安装 Node.js**: 确保你已安装 Node.js (建议 LTS 版本)。
+2. **安装 Pnpm**: 确保你已安装 Pnpm。
+3. **安装前端依赖**: 在 `web` 目录下运行 `pnpm install`。
+4. **开发**:
+    * 启动前端开发服务器: 在 `web` 目录下运行 `pnpm start`。这将在 `http://localhost:3000` 启动一个热重载的开发服务器。它通过 `package.json` 中的 `proxy` 设置代理 API 请求到后端 (`http://localhost:8080`)。
+    * 同时确保后端服务 (`go run main.go`) 正在运行。
+5. **构建**:
+    * 构建生产版本: 在 `web` 目录下运行 `pnpm run build`。这会将所有静态资源生成到 `web/build` 目录。
+    * 构建后端时，它会自动检测 `web/build` 目录并提供这些静态文件，使得应用可以作为一个整体部署。
 
 ## 许可证
 
