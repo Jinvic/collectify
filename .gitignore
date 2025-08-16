@@ -32,6 +32,9 @@ web/build/
 # Log files
 *.log
 
+# Data files
+data/
+
 # Database files (if using file-based DB like SQLite in development outside of :memory:)
 # Uncomment if you want to ignore the default SQLite file, but be careful in production.
 *.db
