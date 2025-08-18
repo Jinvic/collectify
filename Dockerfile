@@ -21,11 +21,11 @@ COPY go.mod go.sum ./
 RUN go mod download
 # 复制源码并构建
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o collectify .
+RUN GOOS=linux go build -ldflags="-w -s" -o collectify .
 
 # Stage 3：生成最终镜像
 FROM alpine:latest
-WORKDIR /app
+WORKDIR /app/data
 # 安装CA证书
 RUN apk --no-cache add ca-certificates
 # 创建非root用户
@@ -33,10 +33,6 @@ RUN adduser -D -s /bin/sh collectify-user
 # 复制构建好的前后端文件
 COPY --from=backend-builder /app/collectify .
 COPY --from=frontend-builder /app/web/build ./web/build
-# 创建data目录
-RUN mkdir -p ./data && \
-    chown -R collectify-user:collectify-user ./data && \
-    chmod 755 ./data
 # 设置文件权限
 RUN chmod +x ./collectify
 RUN chown -R collectify-user:collectify-user ./

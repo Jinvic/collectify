@@ -36,21 +36,16 @@ jobs:
           # 优先使用 workflow_dispatch 输入
           if [ -n "${{ github.event.inputs.image_tag }}" ]; then
             echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
-            echo "VERSION=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
           # 如果是 tag 触发
           elif [[ ${{ github.ref }} == refs/tags/* ]]; then
             TAG_NAME=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
             echo "IMAGE_TAG=${TAG_NAME}" >> $GITHUB_ENV
-            echo "VERSION=${TAG_NAME}" >> $GITHUB_ENV
           # 如果是 cicd 分支
           elif [ "${{ github.ref }}" == "refs/heads/cicd" ]; then
             echo "IMAGE_TAG=test" >> $GITHUB_ENV
-            echo "VERSION=test" >> $GITHUB_ENV
           else
             echo "IMAGE_TAG=unknown" >> $GITHUB_ENV
-            echo "VERSION=unknown" >> $GITHUB_ENV
           fi
-          echo "COMMIT_ID=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
       - name: Build and Push Image
         uses: docker/build-push-action@v6 
@@ -62,6 +57,3 @@ jobs:
             linux/arm64
           tags: |
             ${{ secrets.DOCKER_USER_NAME }}/collectify:${{ env.IMAGE_TAG }}
-          build-args: |
-            VERSION=${{ env.VERSION }}
-            COMMIT_ID=${{ env.COMMIT_ID }}
