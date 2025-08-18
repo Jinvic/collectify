@@ -2,11 +2,16 @@ package main
 
 import (
 	"collectify/cmd"
+	"collectify/internal/cli"
 	"collectify/internal/config"
 	"collectify/internal/db"
 	"collectify/internal/service"
+	"embed"
 	"log"
 )
+
+//go:embed web/build
+var frontendEmbedFS embed.FS
 
 func main() {
 	cfg, err := config.InitConfig()
@@ -24,6 +29,8 @@ func main() {
 			log.Fatalf("Failed to clear recycle bin: %v", err)
 		}
 	}
+
+	cli.SetFrontendFS(frontendEmbedFS)
 
 	cmd.Execute()
 }
