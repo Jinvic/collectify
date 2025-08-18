@@ -81,7 +81,7 @@
 ├── data                # (运行时创建) 数据库存储目录
 ├── internal            # 核心代码
 │   ├── cli             # 命令行具体实现
-│   ├── config          # 配置管理 (Viper)
+│   ├── config          # 配置管理 (caarlos0/env)
 │   ├── dao             # 数据访问对象 (泛型封装)
 │   ├── db              # 数据库初始化 (GORM)
 │   ├── handler         # HTTP 处理函数 (Gin)
@@ -110,7 +110,7 @@
   * [Gin Web Framework](https://github.com/gin-gonic/gin)
   * [GORM](https://gorm.io/)
   * [SQLite](https://www.sqlite.org/) (数据库)
-  * [Viper](https://github.com/spf13/viper) (配置)
+  * [env](https://github.com/caarlos0/env) (配置)
   * [Cobra](https://github.com/spf13/cobra) (CLI)
 * **前端**:
   * [React](https://reactjs.org/)
