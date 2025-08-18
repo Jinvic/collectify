@@ -19,13 +19,15 @@ RUN apk add --no-cache git
 # 复制Go模块文件并下载依赖
 COPY go.mod go.sum ./
 RUN go mod download
-# 复制源码并构建
+# 复制源码
 COPY . .
-RUN GOOS=linux go build -ldflags="-w -s" -o collectify .
+# 显式构建并验证
+RUN CGO_ENABLED=0 GOOS=linux go build -v -ldflags="-w -s" -o collectify .
+RUN ls -l collectify  # 调试：确认文件生成
 
 # Stage 3：生成最终镜像
 FROM alpine:latest
-WORKDIR /app/data
+WORKDIR /app
 # 安装CA证书
 RUN apk --no-cache add ca-certificates
 # 创建非root用户
@@ -35,7 +37,7 @@ COPY --from=backend-builder /app/collectify .
 COPY --from=frontend-builder /app/web/build ./web/build
 # 设置文件权限
 RUN chmod +x ./collectify
-RUN chown -R collectify-user:collectify-user ./
+RUN chown -R collectify-user:collectify-user /app
 # 切换用户并暴露端口
 USER collectify-user
 EXPOSE 8080

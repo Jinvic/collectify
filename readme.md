@@ -78,7 +78,6 @@
 
 ```bash
 ├── cmd                 # Cobra 命令行接口
-├── data                # (运行时创建) 数据库存储目录
 ├── internal            # 核心代码
 │   ├── cli             # 命令行具体实现
 │   ├── config          # 配置管理 (caarlos0/env)
