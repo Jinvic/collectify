@@ -254,7 +254,8 @@ func (b *FieldValueQueryBuilder) queryArrayValues(filter *Filter) error {
 		filter.Where = mergeWheres("AND", filter.Where, newWhere)
 
 	case model.FieldTypeBool:
-		// TODO: 布尔值数组意义不确定
+		// 禁用布尔值数组查询
+		return fmt.Errorf("bool array query is not supported")
 
 	case model.FieldTypeDatetime:
 		// TODO: 时间值数组查询方式不确定

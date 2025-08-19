@@ -58,6 +58,12 @@ const CategoryDetailPage = () => {
   };
 
   const handleCreateField = () => {
+    // Prevent creating boolean array fields
+    if (newField.type === 3 && newField.is_array) {
+      alert("Boolean type fields cannot be arrays.");
+      return;
+    }
+    
     if (newField.name.trim()) {
       createField({ ...newField, category_id: categoryId }, {
         onSuccess: () => {
@@ -66,7 +72,7 @@ const CategoryDetailPage = () => {
         },
         onError: (error) => {
           console.error("Failed to create field:", error);
-          // TODO: Show error to user
+          alert(`Failed to create field: ${error.message}`);
         }
       });
     }
@@ -213,6 +219,7 @@ const CategoryDetailPage = () => {
             <Button
               variant={newField.is_array ? "contained" : "outlined"}
               onClick={() => setNewField({ ...newField, is_array: !newField.is_array })}
+              disabled={newField.type === 3} // Disable array for Boolean type
             >
               Array
             </Button>
@@ -223,6 +230,11 @@ const CategoryDetailPage = () => {
               Required
             </Button>
           </Box>
+          {newField.type === 3 && newField.is_array && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              Boolean type cannot be an array. Array option has been disabled.
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenFieldDialog(false)}>Cancel</Button>

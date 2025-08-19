@@ -7,6 +7,7 @@ import (
 	define "collectify/internal/model/define"
 	"collectify/internal/pkg/e"
 	"collectify/internal/service"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,6 +34,11 @@ func CreateField(c *gin.Context) {
 			"id":        id,
 			"isDeleted": isDeleted,
 		})
+		return
+	}
+
+	if req.Type == model.FieldTypeBool && req.IsArray {
+		Fail(c, e.ErrInvalidParams.Wrap(errors.New("bool array query is not supported")))
 		return
 	}
 

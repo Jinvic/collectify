@@ -3,6 +3,11 @@ import apiClient from './apiClient';
 
 export const fieldService = {
   create: async (fieldData) => {
+    // Prevent creating boolean array fields
+    if (fieldData.type === 3 && fieldData.is_array) {
+      throw new Error('Boolean type fields cannot be arrays.');
+    }
+    
     try {
       const response = await apiClient.post('/field', fieldData);
       return response.data;
