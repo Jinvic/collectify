@@ -45,12 +45,12 @@ jobs:
             IMAGE_TAG="${{ github.event.inputs.image_tag }}"
             echo "Using manual input tag: $IMAGE_TAG"
           # 2. git tag 推送
-          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            IMAGE_TAG=$(echo "${{ github.ref }}" \| sed 's|refs/tags/||')
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            IMAGE_TAG="${GITHUB_REF#refs/tags/}"
             ADD_LATEST="true"
             echo "Git tag detected: $IMAGE_TAG, will also tag as latest"
           # 3. cicd 分支
-          elif [ "${{ github.ref }}" == "refs/heads/cicd" ]; then
+          elif [ "$GITHUB_REF" == "refs/heads/cicd" ]; then
             IMAGE_TAG="test"
             echo "Push from cicd branch"
           else
@@ -58,13 +58,16 @@ jobs:
             echo "Unknown trigger"
           fi
 
+          # 设置环境变量用于日志
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
+          # 构建多行 tags
           TAGS="${DOCKER_USER_NAME}/collectify:$IMAGE_TAG"
           if [ "$ADD_LATEST" = "true" ]; then
-            TAGS="$TAGS/n${DOCKER_USER_NAME}/collectify:latest"
+            TAGS="${TAGS}$'\n'${DOCKER_USER_NAME}/collectify:latest"
           fi
 
+          # 使用 EOF 输出多行内容到 outputs
           echo "tags<<EOF" >> $GITHUB_OUTPUT
           echo "$TAGS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
