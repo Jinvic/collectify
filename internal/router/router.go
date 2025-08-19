@@ -2,25 +2,59 @@ package router
 
 import (
 	"collectify/internal/handler"
+	"net/http"
+	"strings"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter() *gin.Engine {
-	router := gin.Default()
+func InitRouter(frontendFS http.FileSystem) *gin.Engine {
+	r := gin.Default()
+
+	// 配置 CORS
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	r.Use(cors.New(corsConfig))
+
+	if frontendFS != nil {
+		// 提供静态资源
+		r.StaticFS("/static", frontendFS)
+
+		// 提供 favicon
+		r.GET("/favicon.ico", func(c *gin.Context) {
+			c.FileFromFS("/favicon.ico", frontendFS)
+		})
+
+		// 显式处理根路径
+		r.GET("/", func(c *gin.Context) {
+			c.FileFromFS("index.html", frontendFS)
+		})
+
+		// SPA 路由兜底
+		r.NoRoute(func(c *gin.Context) {
+			path := c.Request.URL.Path
+			if strings.HasPrefix(path, "/api/") ||
+				strings.HasPrefix(path, "/static/") ||
+				path == "/favicon.ico" {
+				c.AbortWithStatus(404)
+				return
+			}
+			c.FileFromFS("index.html", frontendFS)
+		})
+	}
 
 	// 将所有 API 路由分组到 /api 路径下
-	api := router.Group("/api")
+	api := r.Group("/api")
 	{
 		initCategoryRouter(api)
 		initFieldRouter(api)
 		initItemRouter(api)
 	}
 
-	// Serve frontend static files
-	// This part is handled in internal/cli/web.go
-
-	return router
+	return r
 }
 
 func initCategoryRouter(router *gin.RouterGroup) {
