@@ -66,15 +66,7 @@ jobs:
           if [ "$ADD_LATEST" = "true" ]; then
             TAGS="${TAGS}$'\n'${DOCKER_USER_NAME}/collectify:latest"
           fi
-
-          # 使用 EOF 输出多行内容到 outputs
-          echo "tags<<EOF" >> $GITHUB_OUTPUT
-          echo "$TAGS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-          echo "🎯 Final image tag: $IMAGE_TAG"
-          echo "📦 Docker tags to push:"
-          echo -e "$TAGS"
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Build and Push Image
         uses: docker/build-push-action@v6
