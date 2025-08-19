@@ -5,7 +5,6 @@ import (
 	"collectify/internal/router"
 	"context"
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -13,25 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	"embed"
-
 	"github.com/gin-gonic/gin"
 )
-
-var frontendEmbedFS embed.FS
-
-// 设置前端文件
-func SetFrontendFS(fs embed.FS) {
-	frontendEmbedFS = fs
-}
-
-// 将 embed.FS 转换为 http.FileSystem
-func getFrontendFS() http.FileSystem {
-	if fsys, err := fs.Sub(frontendEmbedFS, "web/build"); err == nil {
-		return http.FS(fsys)
-	}
-	return nil
-}
 
 func DoWeb() {
 	cfg := config.GetConfig()
@@ -43,14 +25,7 @@ func DoWeb() {
 		gin.SetMode(gin.DebugMode)
 	}
 
-	// 获取前端静态文件
-	frontendFS := getFrontendFS()
-	if frontendFS != nil {
-		log.Println("✅ 已加载嵌入的前端静态文件")
-	} else {
-		log.Println("⚠️ 未找到嵌入的前端文件，仅提供 API 服务")
-	}
-	r := router.InitRouter(frontendFS)
+	r := router.InitRouter()
 
 	// 创建 HTTP 服务器
 	srv := &http.Server{

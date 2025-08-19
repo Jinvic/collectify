@@ -2,9 +2,9 @@ package main
 
 import (
 	"collectify/cmd"
-	"collectify/internal/cli"
 	"collectify/internal/config"
 	"collectify/internal/db"
+	"collectify/internal/router"
 	"collectify/internal/service"
 	"embed"
 	"log"
@@ -30,7 +30,8 @@ func main() {
 		}
 	}
 
-	cli.SetFrontendFS(frontendEmbedFS)
+	// 设置前端文件
+	router.SetFrontendFS(frontendEmbedFS)
 
 	cmd.Execute()
 }

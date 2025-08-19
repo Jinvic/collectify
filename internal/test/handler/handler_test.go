@@ -50,7 +50,7 @@ func setupTestDB() error {
 
 // setupTestRouter initializes the Gin router for testing.
 func setupTestRouter() {
-	testRouter = router.InitRouter(nil)
+	testRouter = router.InitRouter()
 }
 
 // setup initializes the test environment before all tests.

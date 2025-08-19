@@ -2,6 +2,9 @@ package router
 
 import (
 	"collectify/internal/handler"
+	"embed"
+	"io/fs"
+	"log"
 	"net/http"
 	"strings"
 
@@ -9,7 +12,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter(frontendFS http.FileSystem) *gin.Engine {
+var frontendEmbedFS embed.FS
+
+// 设置前端文件
+func SetFrontendFS(fs embed.FS) {
+	frontendEmbedFS = fs
+}
+
+// 将 embed.FS 转换为 http.FileSystem
+func getFrontendFS() http.FileSystem {
+	fsys, err := fs.Sub(frontendEmbedFS, "web/build")
+	if err != nil {
+		return nil
+	}
+	return http.FS(fsys)
+}
+func getFrontendStaticFS() http.FileSystem {
+	fsys, err := fs.Sub(frontendEmbedFS, "web/build/static")
+	if err != nil {
+		return nil
+	}
+	return http.FS(fsys)
+}
+
+
+func InitRouter() *gin.Engine {
 	r := gin.Default()
 
 	// 配置 CORS
@@ -19,16 +46,25 @@ func InitRouter(frontendFS http.FileSystem) *gin.Engine {
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(corsConfig))
 
-	if frontendFS != nil {
-		// 提供静态资源
-		r.StaticFS("/static", frontendFS)
+	// 获取前端静态文件
+	frontendFS := getFrontendFS()
+	frontendStaticFS := getFrontendStaticFS()
+	if frontendFS != nil && frontendStaticFS != nil {
+		log.Println("✅ 已加载嵌入的前端静态文件")
+	} else {
+		log.Println("⚠️ 未找到嵌入的前端文件，仅提供 API 服务")
+	}
 
-		// 提供 favicon
+	if frontendFS != nil {
+		// 挂载静态目录
+		r.StaticFS("/static", frontendStaticFS)
+
+		// favicon
 		r.GET("/favicon.ico", func(c *gin.Context) {
-			c.FileFromFS("/favicon.ico", frontendFS)
+			c.FileFromFS("favicon.ico", frontendFS)
 		})
 
-		// 显式处理根路径
+		// 根路径返回 index.html
 		r.GET("/", func(c *gin.Context) {
 			c.FileFromFS("index.html", frontendFS)
 		})
