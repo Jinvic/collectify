@@ -51,13 +51,41 @@ jobs:
       - name: Get dependencies
         run: go mod download
 
+      # -------------------------------
+      # 构建前端项目（web/build）
+      # -------------------------------
+      - name: Install pnpm
+        uses: pnpm/action-pnpm@v3
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install and Build Web Frontend
+        run: |
+          cd web
+          pnpm install
+          pnpm run build
+        shell: bash
+
+      # -------------------------------
+      # 构建 Go 二进制文件
+      # -------------------------------
       - name: Build ${{ matrix.output }}
         run: |
+          mkdir -p dist
           go build -ldflags="-s -w" -o "dist/${{ matrix.output }}" .
+        shell: bash
 
+      # -------------------------------
+      # 打包为 ZIP（Linux 和 Windows 分别处理）
+      # -------------------------------
       - name: Archive artifact (Linux)
         run: |
-          mkdir -p dist
           zip -j "dist/${{ matrix.output }}.zip" "dist/${{ matrix.output }}"
         shell: bash
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -80,7 +108,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 允许创建 Release
+      contents: write
 
     steps:
       - name: Download all artifacts
