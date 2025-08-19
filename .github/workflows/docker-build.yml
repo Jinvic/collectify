@@ -62,7 +62,7 @@ jobs:
 
           TAGS="${DOCKER_USER_NAME}/collectify:$IMAGE_TAG"
           if [ "$ADD_LATEST" = "true" ]; then
-            TAGS="$TAGS,${DOCKER_USER_NAME}/collectify:latest"
+            TAGS="$TAGS/n${DOCKER_USER_NAME}/collectify:latest"
           fi
 
           echo "tags<<EOF" >> $GITHUB_OUTPUT
