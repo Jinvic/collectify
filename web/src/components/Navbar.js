@@ -1,7 +1,7 @@
 // src/components/Navbar.js
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material';
 
 const Navbar = () => {
   const location = useLocation();
@@ -17,7 +17,26 @@ const Navbar = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <IconButton
+          component={Link}
+          to="/"
+          color="inherit"
+          sx={{ mr: 1 }}
+        >
+          <img src="/logo192.png" alt="Collectify Logo" style={{ height: 40 }} />
+        </IconButton>
+        <Typography 
+          variant="h6" 
+          component={Link} 
+          to="/" 
+          sx={{ 
+            flexGrow: 1, 
+            textDecoration: 'none', 
+            color: 'inherit',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
           Collectify
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>

@@ -64,6 +64,9 @@ func initFrontendRouter(r *gin.Engine) {
 		r.GET("/asset-manifest.json", func(c *gin.Context) {
 			fileHandler(c, "asset-manifest.json")
 		})
+		r.GET("/logo192.png", func(c *gin.Context) {
+			fileHandler(c, "logo192.png")
+		})
 
 		// SPA 路由兜底 - 处理所有前端路由
 		r.NoRoute(func(c *gin.Context) {
