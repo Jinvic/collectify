@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > [!WARNING]
-> 此项目正在开发中，仍未完成基础功能。
+> 此项目正在开发中，仅完成部分基础功能。
 
 **Collectify** 是一个轻量级、易于使用的个人收藏管理系统，帮助你整理和管理你的书籍、音乐、影视等各类收藏品。无论是为了记录你的阅读进度，还是为了整理你喜爱的音乐专辑，Collectify 都能为你提供所需的一切工具。
 
@@ -23,16 +23,27 @@
 
 这是最简单的启动方式。
 
-1. **克隆项目**:
+1. **获取docker compose 文件**:
+    * 克隆项目:
+  
+        ```bash
+        git clone https://github.com/Jinvic/collectify.git
+        cd collectify
+        ```
 
-    ```bash
-    git clone https://github.com/Jinvic/collectify.git
-    cd collectify
-    ```
+    * 或者单独下载所需文件:
+  
+        ```bash
+        mkdir collectify
+        cd collectify
+        wget https://raw.githubusercontent.com/Jinvic/collectify/master/docker-compose.yml
+        wget https://raw.githubusercontent.com/Jinvic/collectify/master/.env.example
+        ```
 
-2. **配置环境变量 (可选)**:
+2. **配置环境变量**:
     * 复制 `.env.example` 文件为 `.env`。
-    * 根据需要修改 `.env` 文件中的配置 (例如端口、数据库路径、是否启用回收站等)。
+    * 根据需要修改 `.env` 文件中的配置。
+
 3. **启动服务**:
 
     ```bash
@@ -50,14 +61,14 @@
 1. **安装 Go**: 确保你已安装 Go 1.23 或更高版本。
 2. **获取依赖**: 在项目根目录下运行 `go mod tidy`。
 3. **运行后端**:
-    * 开发模式: `go run main.go web` (默认监听 :8080)。
+    * 开发模式: `go run main.go` (默认监听 :8080)。
     * 或构建后运行:
 
         ```bash
         go build -o collectify .
-        ./collectify web # (Linux/macOS)
+        ./collectify # (Linux/macOS)
         # 或
-        collectify.exe web # (Windows)
+        collectify.exe # (Windows)
         ```
 
 #### 前端 (Web UI)
@@ -69,10 +80,10 @@
 3. **安装前端依赖**: 在 `web` 目录下运行 `pnpm install`。
 4. **开发**:
     * 启动前端开发服务器: 在 `web` 目录下运行 `pnpm start`。这将在 `http://localhost:3000` 启动一个热重载的开发服务器。它通过 `package.json` 中的 `proxy` 设置代理 API 请求到后端 (`http://localhost:8080`)。
-    * 同时确保后端服务 (`go run main.go web`) 正在运行。
+    * 同时确保后端服务 (`go run main.go`) 正在运行。
 5. **构建**:
     * 构建生产版本: 在 `web` 目录下运行 `pnpm run build`。这会将所有静态资源生成到 `web/build` 目录。
-    * 构建后端时，它会自动检测 `web/build` 目录并提供这些静态文件，使得应用可以作为一个整体部署。
+    * 构建后端时，它会将 `web/build` 目录嵌入到二进制文件中，使得应用可以作为一个整体部署。
 
 ## 项目结构
 

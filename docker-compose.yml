@@ -1,7 +1,7 @@
 services:
   app:
     image: jinvic/collectify:latest
-    container_name: collectify-app
+    container_name: collectify
     restart: unless-stopped
     ports:
       - "8080:8080"
