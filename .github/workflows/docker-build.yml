@@ -1,4 +1,5 @@
 name: Build And Upload Image
+
 on:
   push:
     branches:
@@ -15,6 +16,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,29 +33,52 @@ jobs:
           username: ${{ secrets.DOCKER_USER_NAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
-      - name: Determine Image Tag
+      - name: Determine Image Tag and Tags List
         run: |
-          # 优先使用 workflow_dispatch 输入
+          # 初始化变量
+          DOCKER_USER_NAME="${{ secrets.DOCKER_USER_NAME }}"
+          IMAGE_TAG=""
+          ADD_LATEST="false"
+
+          # 1. 优先使用 workflow_dispatch 输入
           if [ -n "${{ github.event.inputs.image_tag }}" ]; then
-            echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
-          # 如果是 tag 触发
-          elif [[ ${{ github.ref }} == refs/tags/* ]]; then
-            TAG_NAME=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
-            echo "IMAGE_TAG=${TAG_NAME}" >> $GITHUB_ENV
-          # 如果是 cicd 分支
+            IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+            echo "Image tag from manual input: $IMAGE_TAG"
+          # 2. 如果是 git tag 推送（如 v1.2.3）
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            IMAGE_TAG=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
+            ADD_LATEST="true"
+            echo "Git tag detected: $IMAGE_TAG, will also tag as latest"
+          # 3. 如果是 cicd 分支
           elif [ "${{ github.ref }}" == "refs/heads/cicd" ]; then
-            echo "IMAGE_TAG=test" >> $GITHUB_ENV
+            IMAGE_TAG="test"
+            echo "Push from cicd branch, using 'test' tag"
           else
-            echo "IMAGE_TAG=unknown" >> $GITHUB_ENV
+            IMAGE_TAG="unknown"
+            echo "Unknown trigger, using 'unknown' tag"
           fi
 
+          # 写入环境变量
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+          # 构建最终的 tags 列表
+          TAGS="${DOCKER_USER_NAME}/collectify:$IMAGE_TAG"
+          if [ "$ADD_LATEST" = "true" ]; then
+            TAGS="$TAGS\n${DOCKER_USER_NAME}/collectify:latest"
+          fi
+          echo -e "DOCKER_TAGS=$TAGS" >> $GITHUB_ENV
+
+          # 输出用于调试
+          echo "🎯 Final image tag: $IMAGE_TAG"
+          echo "📦 Docker tags to push:"
+          echo -e "$TAGS"
+
       - name: Build and Push Image
-        uses: docker/build-push-action@v6 
+        uses: docker/build-push-action@v6
         with:
           push: true
           context: .
           platforms: |
             linux/amd64
             linux/arm64
-          tags: |
-            ${{ secrets.DOCKER_USER_NAME }}/collectify:${{ env.IMAGE_TAG }}
+          tags: ${{ env.DOCKER_TAGS }}
