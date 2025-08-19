@@ -69,9 +69,14 @@ jobs:
           echo -e "DOCKER_TAGS=$TAGS" >> $GITHUB_ENV
 
           # 输出用于调试
-          echo "🎯 Final image tag: $IMAGE_TAG"
-          echo "📦 Docker tags to push:"
+          echo "Final image tag: $IMAGE_TAG"
+          echo "Docker tags to push:"
           echo -e "$TAGS"
+
+          # 使用 set-output 正确输出多行
+          echo "tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$TAGS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Build and Push Image
         uses: docker/build-push-action@v6
@@ -81,4 +86,4 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          tags: ${{ env.DOCKER_TAGS }}
+          tags: ${{ steps.set-output.outputs.tags }}
