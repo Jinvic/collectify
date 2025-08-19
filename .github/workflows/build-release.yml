@@ -125,9 +125,14 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
           body: |
-            Thanks for using Collectify!
+            # Collectify
 
-            This release includes binaries for Linux and Windows (amd64/arm64).
+            > [!WARNING]
+            > 此项目正在开发中，仅完成部分基础功能。
+
+            **Collectify** 是一个轻量级、易于使用的个人收藏管理系统，帮助你整理和管理你的书籍、音乐、影视等各类收藏品。无论是为了记录你的阅读进度，还是为了整理你喜爱的音乐专辑，Collectify 都能为你提供所需的一切工具。
+
+            ---
           files: release-assets/**/*
           draft: false
           prerelease: false
