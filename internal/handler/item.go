@@ -118,7 +118,7 @@ func SearchItems(c *gin.Context) {
 		Size:    req.PageSize,
 	}
 
-	items, total, err := service.SearchItems(req.CategoryID, req.Title, req.TagIDs, req.CollectionIDs, req.Filters, pagination)
+	items, total, err := service.SearchItems(req.CategoryID, req.Name, req.TagIDs, req.CollectionIDs, req.Filters, pagination)
 	if err != nil {
 		Fail(c, err)
 		return

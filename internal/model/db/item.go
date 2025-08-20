@@ -17,7 +17,7 @@ const (
 // Item 收藏品
 type Item struct {
 	gorm.Model
-	Title       string     `gorm:"not null;index" json:"title"`                                    // 名称
+	Name        string     `gorm:"not null;index" json:"name"`                                     // 名称
 	CategoryID  uint       `gorm:"not null;index" json:"category_id"`                              // 关联的类别ID
 	Status      int        `gorm:"not null;default:1;index" json:"status"`                         // 状态
 	Rating      *float64   `gorm:"type:decimal(3,1);check:rating>=0 and rating<=10" json:"rating"` // 评分

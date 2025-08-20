@@ -15,7 +15,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
   
   const [selectedCategory, setSelectedCategory] = useState('');
   const [itemData, setItemData] = useState({
-    title: '',
+    name: '',
     status: 1,
     rating: '',
     description: '',
@@ -34,7 +34,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
   };
 
   const handleCreate = () => {
-    if (selectedCategory && itemData.title.trim()) {
+    if (selectedCategory && itemData.name.trim()) {
       const dataToSubmit = {
         category_id: selectedCategory,
         item: {
@@ -49,7 +49,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
           // Reset form
           setSelectedCategory('');
           setItemData({
-            title: '',
+            name: '',
             status: 1,
             rating: '',
             description: '',
@@ -99,12 +99,12 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
           </FormControl>
           
           <TextField
-            label="Title"
+            label="Name"
             fullWidth
             margin="normal"
             required
-            value={itemData.title}
-            onChange={(e) => handleInputChange('title', e.target.value)}
+            value={itemData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
             disabled={isCreating}
           />
           
@@ -193,7 +193,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
         </Button>
         <Button 
           onClick={handleCreate} 
-          disabled={isCreating || !selectedCategory || !itemData.title.trim()}
+          disabled={isCreating || !selectedCategory || !itemData.name.trim()}
           variant="contained"
           color="primary"
         >

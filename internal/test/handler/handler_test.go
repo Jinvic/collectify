@@ -282,7 +282,7 @@ func TestItemAPI(t *testing.T) {
 
 	// 1. Create an item
 	itemData := map[string]interface{}{
-		"title":       "The Go Programming Language",
+		"name":        "The Go Programming Language",
 		"status":      1, // Todo
 		"description": "A book about Go.",
 		"values": []map[string]interface{}{
@@ -316,7 +316,7 @@ func TestItemAPI(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &getResp)
 	assert.NoError(t, err)
 	assert.Equal(t, handler.SuccessCode, getResp.Code)
-	assert.Equal(t, itemData["title"], getResp.Data["title"])
+	assert.Equal(t, itemData["name"], getResp.Data["name"])
 
 	// --- Temporary adjustment for debugging Item Values ---
 	// Print the actual response to see the structure of 'values'
@@ -358,7 +358,7 @@ func TestItemAPI(t *testing.T) {
 
 	// 4. Update the item
 	updateItemData := map[string]interface{}{
-		"title":  "The Go Programming Language (Updated)",
+		"name":   "The Go Programming Language (Updated)",
 		"status": 2, // In Progress
 		"values": []map[string]interface{}{
 			{
@@ -383,7 +383,7 @@ func TestItemAPI(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &getResp)
 	assert.NoError(t, err)
 	assert.Equal(t, handler.SuccessCode, getResp.Code)
-	assert.Equal(t, updateItemData["title"], getResp.Data["title"])
+	assert.Equal(t, updateItemData["name"], getResp.Data["name"])
 
 	// 6. Delete the item
 	w = performRequest("DELETE", fmt.Sprintf("/item/%d", itemID), nil)
@@ -406,7 +406,7 @@ func TestItemAPI(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &getResp)
 	assert.NoError(t, err)
 	assert.Equal(t, handler.SuccessCode, getResp.Code)
-	assert.Equal(t, updateItemData["title"], getResp.Data["title"]) // Check updated title is restored
+	assert.Equal(t, updateItemData["name"], getResp.Data["name"]) // Check updated name is restored
 }
 
 // --- Search Items Test ---

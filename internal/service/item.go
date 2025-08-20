@@ -75,7 +75,7 @@ func UpdateItem(item *model.Item, values []define.ItemFieldValue) error {
 
 		// 更新收藏品信息
 		updateFields := map[string]interface{}{
-			"title":       item.Title,
+			"name":        item.Name,
 			"status":      item.Status,
 			"rating":      item.Rating,
 			"description": item.Description,
@@ -227,7 +227,7 @@ func ListItems(p common.Pagination) ([]model.Item, int64, error) {
 }
 
 // SearchItems 搜索收藏品
-func SearchItems(categoryID uint, title string, tagIDs []uint, collectionIDs []uint, fs map[uint]interface{}, p common.Pagination) ([]model.Item, int64, error) {
+func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []uint, fs map[uint]interface{}, p common.Pagination) ([]model.Item, int64, error) {
 	db := db.GetDB()
 
 	// 预加载关联表
@@ -261,11 +261,11 @@ func SearchItems(categoryID uint, title string, tagIDs []uint, collectionIDs []u
 			Args:  []interface{}{categoryID},
 		},
 	}
-	// 标题可选
-	if title != "" {
+	// 名称可选
+	if name != "" {
 		filters = append(filters, dao.Filter{
-			Where: "items.title LIKE ?",
-			Args:  []interface{}{"%" + title + "%"},
+			Where: "items.name LIKE ?",
+			Args:  []interface{}{"%" + name + "%"},
 		})
 	}
 	if len(tagIDs) > 0 {

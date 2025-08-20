@@ -19,7 +19,7 @@ type Item struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt time.Time `json:"deleted_at"`
 
-	Title       string           `json:"title" form:"title" binding:"required"`
+	Name        string           `json:"name" form:"name" binding:"required"`
 	Status      int              `json:"status" form:"status" binding:"required,oneof=1 2 3 4 5"`
 	Rating      *float64         `json:"rating" form:"rating" binding:"omitempty,min=0,max=10"`
 	Description string           `json:"description" form:"description"`
@@ -34,7 +34,7 @@ type Item struct {
 
 func (i Item) ToDB() *model.Item {
 	return &model.Item{
-		Title:       i.Title,
+		Name:        i.Name,
 		Status:      i.Status,
 		Rating:      i.Rating,
 		Description: i.Description,
@@ -51,7 +51,7 @@ func (i *Item) FromDB(item *model.Item) {
 	i.UpdatedAt = item.UpdatedAt
 	i.DeletedAt = item.DeletedAt.Time
 
-	i.Title = item.Title
+	i.Name = item.Name
 	i.Status = item.Status
 	i.Rating = item.Rating
 	i.Description = item.Description

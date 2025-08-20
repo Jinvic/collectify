@@ -48,7 +48,7 @@ type UpdateItemReq struct {
 type SearchItemsReq struct {
 	SearchReq
 	CategoryID    uint   `json:"category_id" form:"category_id" binding:"required,gt=0"`
-	Title         string `json:"title" form:"title"`
+	Name          string `json:"name" form:"name"`
 	TagIDs        []uint `json:"tag_ids" form:"tag_ids"`
 	CollectionIDs []uint `json:"collection_ids" form:"collection_ids"`
 }

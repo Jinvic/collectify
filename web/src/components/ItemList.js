@@ -42,7 +42,7 @@ const ItemList = ({ items, total, loading, error, page, pageSize, onPageChange, 
         <Table sx={{ minWidth: 650 }} aria-label="items table">
           <TableHead>
             <TableRow>
-              <TableCell>Title</TableCell>
+              <TableCell>Name</TableCell>
               {showCategory && <TableCell>Category</TableCell>}
               <TableCell>Status</TableCell>
               <TableCell>Rating</TableCell>
@@ -54,7 +54,7 @@ const ItemList = ({ items, total, loading, error, page, pageSize, onPageChange, 
             {items.map((item) => (
               <TableRow key={item.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 <TableCell component="th" scope="row">
-                  {item.title}
+                  {item.name}
                 </TableCell>
                 {showCategory && (
                   <TableCell>

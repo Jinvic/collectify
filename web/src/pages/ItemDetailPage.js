@@ -32,7 +32,7 @@ const ItemDetailPage = () => {
       // Initialize editedItem with current item data
       // This is a simplified approach. A more robust way would be to have a form library.
       const initialValues = {
-        title: item.title || '',
+        name: item.name || '',
         status: item.status || 1,
         rating: item.rating !== null ? item.rating : '',
         description: item.description || '',
@@ -69,7 +69,7 @@ const ItemDetailPage = () => {
     const updateData = {
       // id: itemId, // ID is in the URL
       item: {
-        title: editedItem.title,
+        name: editedItem.name,
         status: editedItem.status,
         rating: editedItem.rating === '' ? null : parseFloat(editedItem.rating),
         description: editedItem.description,
@@ -126,7 +126,7 @@ const ItemDetailPage = () => {
       <Box my={4}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h4" component="h1">
-            {editMode ? 'Edit Item' : item.title}
+            {editMode ? 'Edit Item' : item.name}
           </Typography>
           {!editMode && (
             <Box>
@@ -154,11 +154,11 @@ const ItemDetailPage = () => {
         {editMode ? (
           <Paper elevation={3} sx={{ p: 3 }}>
             <TextField
-              label="Title"
+              label="Name"
               fullWidth
               margin="normal"
-              value={editedItem.title || ''}
-              onChange={(e) => handleInputChange('title', e.target.value)}
+              value={editedItem.name || ''}
+              onChange={(e) => handleInputChange('name', e.target.value)}
             />
             <FormControl fullWidth margin="normal">
               <InputLabel>Status</InputLabel>
@@ -364,7 +364,7 @@ const ItemDetailPage = () => {
         <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography id="delete-dialog-description">
-            Are you sure you want to delete "{item.title}"? This action cannot be undone.
+            Are you sure you want to delete "{item.name}"? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>
