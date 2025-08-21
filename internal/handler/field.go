@@ -42,6 +42,11 @@ func CreateField(c *gin.Context) {
 		return
 	}
 
+	if req.Type == model.FieldTypeDatetime && req.IsArray {
+		Fail(c, e.ErrInvalidParams.Wrap(errors.New("datetime array query is not supported")))
+		return
+	}
+
 	field := &model.Field{
 		CategoryID: req.CategoryID,
 		Name:       req.Name,

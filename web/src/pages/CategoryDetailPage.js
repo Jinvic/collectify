@@ -64,6 +64,12 @@ const CategoryDetailPage = () => {
       return;
     }
     
+    // Prevent creating datetime array fields
+    if (newField.type === 4 && newField.is_array) {
+      alert("Datetime type fields cannot be arrays.");
+      return;
+    }
+    
     if (newField.name.trim()) {
       createField({ ...newField, category_id: categoryId }, {
         onSuccess: () => {
@@ -219,7 +225,7 @@ const CategoryDetailPage = () => {
             <Button
               variant={newField.is_array ? "contained" : "outlined"}
               onClick={() => setNewField({ ...newField, is_array: !newField.is_array })}
-              disabled={newField.type === 3} // Disable array for Boolean type
+              disabled={newField.type === 3 || newField.type === 4} // Disable array for Boolean and Datetime types
             >
               Array
             </Button>
@@ -233,6 +239,11 @@ const CategoryDetailPage = () => {
           {newField.type === 3 && newField.is_array && (
             <Alert severity="warning" sx={{ mt: 2 }}>
               Boolean type cannot be an array. Array option has been disabled.
+            </Alert>
+          )}
+          {newField.type === 4 && newField.is_array && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              Datetime type cannot be an array. Array option has been disabled.
             </Alert>
           )}
         </DialogContent>

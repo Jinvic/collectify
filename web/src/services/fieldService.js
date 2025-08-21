@@ -8,6 +8,11 @@ export const fieldService = {
       throw new Error('Boolean type fields cannot be arrays.');
     }
     
+    // Prevent creating datetime array fields
+    if (fieldData.type === 4 && fieldData.is_array) {
+      throw new Error('Datetime type fields cannot be arrays.');
+    }
+    
     try {
       const response = await apiClient.post('/field', fieldData);
       return response.data;

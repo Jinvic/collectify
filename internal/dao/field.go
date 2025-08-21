@@ -2,6 +2,7 @@ package dao
 
 import (
 	model "collectify/internal/model/db"
+	"collectify/internal/model/define"
 	"fmt"
 	"strings"
 	"time"
@@ -222,7 +223,14 @@ func (b *FieldValueQueryBuilder) querySingleValue(filter *Filter) error {
 		filter.Where = mergeWheres("AND", filter.Where, newWhere)
 
 	case model.FieldTypeDatetime:
-		// TODO: 时间值查询方式不确定
+		// 时间值查询解析为特定结构体
+		value, ok := b.value.(define.SearchFilterDatetime)
+		if !ok {
+			return fmt.Errorf("invalid datetime value for field %s", b.field.Name)
+		}
+		newWhere := "item_field_values.value_time >= ? AND item_field_values.value_time <= ?"
+		filter.Args = append(filter.Args, value.Start, value.End)
+		filter.Where = mergeWheres("AND", filter.Where, newWhere)
 	}
 
 	return nil
@@ -258,7 +266,21 @@ func (b *FieldValueQueryBuilder) queryArrayValues(filter *Filter) error {
 		return fmt.Errorf("bool array query is not supported")
 
 	case model.FieldTypeDatetime:
-		// TODO: 时间值数组查询方式不确定
+		// // 时间值数组查询解析为特定结构体数组
+		// values, ok := b.value.([]define.SearchFilterDatetime)
+		// if !ok {
+		// 	return fmt.Errorf("invalid datetime value for field %s", b.field.Name)
+		// }
+		// wheres := []string{}
+		// for _, value := range values {
+		// 	wheres = append(wheres, "item_field_values.value_time >= ? AND item_field_values.value_time <= ?")
+		// 	filter.Args = append(filter.Args, value.Start, value.End)
+		// }
+		// newWhere := mergeWheres("OR", wheres...)
+		// filter.Where = mergeWheres("AND", filter.Where, newWhere)
+
+		// 禁用时间值数组查询
+		return fmt.Errorf("datetime array query is not supported")
 	}
 
 	return nil

@@ -1,5 +1,7 @@
 package define
 
+import "time"
+
 type DeletedReq struct {
 	List []DeletedReqItem `json:"list" form:"list" binding:"required,dive"`
 }
@@ -12,6 +14,11 @@ type ListReq struct {
 type SearchReq struct {
 	ListReq
 	Filters map[uint]interface{} `json:"filters" form:"filters"`
+}
+
+type SearchFilterDatetime struct {
+	Start time.Time `json:"start" form:"start"`
+	End   time.Time `json:"end" form:"end"`
 }
 
 type DeletedReqItem struct {
