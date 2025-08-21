@@ -3,7 +3,7 @@ package main
 import (
 	"collectify/cmd"
 	"collectify/internal/config"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	"collectify/internal/router"
 	"collectify/internal/service"
 	"embed"
@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize config: %v", err)
 	}
-	if err = db.InitDB(cfg); err != nil {
+	if err = conn.InitDB(cfg); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 

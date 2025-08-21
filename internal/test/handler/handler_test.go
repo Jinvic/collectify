@@ -3,7 +3,7 @@ package handler_test
 import (
 	"bytes"
 	"collectify/internal/config"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	"collectify/internal/handler"
 	"collectify/internal/router"
 	"encoding/json"
@@ -39,12 +39,12 @@ func setupTestDB() error {
 	}
 	config.SetConfig(&defaultConfig)
 
-	err := db.InitDB(&defaultConfig)
+	err := conn.InitDB(&defaultConfig)
 	if err != nil {
 		return fmt.Errorf("failed to initialize test database: %w", err)
 	}
 
-	testDB = db.GetDB()
+	testDB = conn.GetDB()
 	return nil
 }
 

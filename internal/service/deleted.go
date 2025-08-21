@@ -2,7 +2,7 @@ package service
 
 import (
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	model "collectify/internal/model/db"
 
 	"gorm.io/gorm"
@@ -18,7 +18,7 @@ var DeleteByFilterFuncs = map[string]func(tx *gorm.DB, filters []dao.Filter, isS
 }
 
 func ClearRecycleBin() error {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	filters := []dao.Filter{
 		{

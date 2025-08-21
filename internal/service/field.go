@@ -3,7 +3,7 @@ package service
 import (
 	"collectify/internal/config"
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	model "collectify/internal/model/db"
 
 	"gorm.io/gorm"
@@ -11,7 +11,7 @@ import (
 
 // DeleteField 删除字段
 func DeleteField(fieldID uint) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 	cfg := config.GetConfig()
 	isSoftDelete := cfg.RecycleBin.Enable
 
@@ -41,7 +41,7 @@ func DeleteField(fieldID uint) error {
 
 // RestoreField 恢复字段
 func RestoreField(fieldID uint) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var uniqueFields map[string]interface{}

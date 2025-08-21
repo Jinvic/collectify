@@ -3,7 +3,7 @@ package service
 import (
 	"collectify/internal/config"
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	"collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
@@ -15,7 +15,7 @@ import (
 
 // CreateItem 创建收藏品
 func CreateItem(item *model.Item, values []define.ItemFieldValue) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// 创建收藏品
@@ -59,7 +59,7 @@ func CreateItem(item *model.Item, values []define.ItemFieldValue) error {
 
 // UpdateItem 更新收藏品信息
 func UpdateItem(item *model.Item, values []define.ItemFieldValue) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		uniqueFields := map[string]interface{}{"id": item.ID}
@@ -135,7 +135,7 @@ func UpdateItem(item *model.Item, values []define.ItemFieldValue) error {
 
 // DeleteItem 删除收藏品
 func DeleteItem(itemID uint) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 	cfg := config.GetConfig()
 	isSoftDelete := cfg.RecycleBin.Enable
 
@@ -165,7 +165,7 @@ func DeleteItem(itemID uint) error {
 
 // RestoreItem 恢复收藏品
 func RestoreItem(itemID uint) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var uniqueFields map[string]interface{}
@@ -204,7 +204,7 @@ func RestoreItem(itemID uint) error {
 
 // ListItems 列出收藏品
 func ListItems(p common.Pagination) ([]model.Item, int64, error) {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	filters := []dao.Filter{}
 	orderBy := []dao.OrderBy{
@@ -228,7 +228,7 @@ func ListItems(p common.Pagination) ([]model.Item, int64, error) {
 
 // SearchItems 搜索收藏品
 func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []uint, fs map[uint]interface{}, p common.Pagination) ([]model.Item, int64, error) {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	// 预加载关联表
 	joins := []dao.Join{

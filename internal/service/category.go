@@ -3,7 +3,7 @@ package service
 import (
 	"collectify/internal/config"
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	model "collectify/internal/model/db"
 
 	"gorm.io/gorm"
@@ -11,7 +11,7 @@ import (
 
 // DeleteCategory 删除分类
 func DeleteCategory(categoryID uint) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 	cfg := config.GetConfig()
 	isSoftDelete := cfg.RecycleBin.Enable
 
@@ -65,7 +65,7 @@ func DeleteCategory(categoryID uint) error {
 
 // RestoreCategory 恢复分类
 func RestoreCategory(categoryID uint) error {
-	db := db.GetDB()
+	db := conn.GetDB()
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// 获取分类下的字段ID

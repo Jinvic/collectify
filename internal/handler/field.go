@@ -2,7 +2,7 @@ package handler
 
 import (
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
 	"collectify/internal/pkg/e"
@@ -24,7 +24,7 @@ func CreateField(c *gin.Context) {
 		"name":        req.Name,
 	}
 	filters := []dao.Filter{}
-	id, isDeleted, err := dao.DuplicateCheck[model.Field](db.GetDB(), uniqueFields, filters)
+	id, isDeleted, err := dao.DuplicateCheck[model.Field](conn.GetDB(), uniqueFields, filters)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -55,7 +55,7 @@ func CreateField(c *gin.Context) {
 		Required:   req.Required,
 	}
 
-	err = dao.Create(db.GetDB(), field)
+	err = dao.Create(conn.GetDB(), field)
 	if err != nil {
 		Fail(c, err)
 		return

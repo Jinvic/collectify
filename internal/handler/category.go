@@ -2,7 +2,7 @@ package handler
 
 import (
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
@@ -24,7 +24,7 @@ func CreateCategory(c *gin.Context) {
 	// 检查是否重复
 	uniqueFields := map[string]interface{}{"name": req.Name}
 	filters := []dao.Filter{}
-	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), uniqueFields, filters)
+	id, isDeleted, err := dao.DuplicateCheck[model.Category](conn.GetDB(), uniqueFields, filters)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -41,7 +41,7 @@ func CreateCategory(c *gin.Context) {
 	category := &model.Category{
 		Name: req.Name,
 	}
-	err = dao.Create(db.GetDB(), category)
+	err = dao.Create(conn.GetDB(), category)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -105,7 +105,7 @@ func RenameCategory(c *gin.Context) {
 			Args:  []interface{}{id},
 		},
 	}
-	id, isDeleted, err := dao.DuplicateCheck[model.Category](db.GetDB(), uniqueFields, filters)
+	id, isDeleted, err := dao.DuplicateCheck[model.Category](conn.GetDB(), uniqueFields, filters)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -120,7 +120,7 @@ func RenameCategory(c *gin.Context) {
 
 	uniqueFields = map[string]interface{}{"id": id}
 	updateFields := map[string]interface{}{"name": req.Name}
-	err = dao.Update[model.Category](db.GetDB(), uniqueFields, updateFields)
+	err = dao.Update[model.Category](conn.GetDB(), uniqueFields, updateFields)
 	if err != nil {
 		Fail(c, err)
 		return
@@ -138,7 +138,7 @@ func GetCategory(c *gin.Context) {
 
 	uniqueFields := map[string]interface{}{"id": id}
 	preloads := []string{"Fields"}
-	category, err := dao.Get[model.Category](db.GetDB(), uniqueFields, preloads...)
+	category, err := dao.Get[model.Category](conn.GetDB(), uniqueFields, preloads...)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			Fail(c, e.ErrNotFound)
@@ -179,7 +179,7 @@ func ListCategory(c *gin.Context) {
 			Desc:   false,
 		},
 	}
-	categories, total, err := dao.GetList[model.Category](db.GetDB(), filters, orderBy, pagination)
+	categories, total, err := dao.GetList[model.Category](conn.GetDB(), filters, orderBy, pagination)
 	if err != nil {
 		Fail(c, err)
 		return

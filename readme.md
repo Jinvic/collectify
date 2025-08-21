@@ -93,7 +93,7 @@
 │   ├── cli             # 命令行具体实现
 │   ├── config          # 配置管理 (caarlos0/env)
 │   ├── dao             # 数据访问对象 (泛型封装)
-│   ├── db              # 数据库初始化 (GORM)
+│   ├── conn            # 数据库初始化 (GORM)
 │   ├── handler         # HTTP 处理函数 (Gin)
 │   ├── middleware      # Gin 中间件
 │   ├── model           # 数据模型定义

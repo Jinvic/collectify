@@ -2,7 +2,7 @@ package handler
 
 import (
 	"collectify/internal/dao"
-	"collectify/internal/db"
+	"collectify/internal/conn"
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
@@ -144,7 +144,7 @@ func GetItem(c *gin.Context) {
 
 	uniqueFields := map[string]interface{}{"id": id}
 	preloads := []string{"Category", "Tags", "Collections", "Values", "Values.Field"}
-	item, err := dao.Get[model.Item](db.GetDB(), uniqueFields, preloads...)
+	item, err := dao.Get[model.Item](conn.GetDB(), uniqueFields, preloads...)
 	if err != nil {
 		Fail(c, err)
 		return
