@@ -36,10 +36,40 @@ func InitDB(cfg *config.Config) error {
 		&model.Item{},
 		&model.Tag{},
 		&model.ItemFieldValue{},
+		&model.User{},
 	)
-	return err
+	if err != nil {
+		return err
+	}
+
+	err = initAdminUser()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetDB() *gorm.DB {
 	return db
+}
+
+// 当用户表为空时，创建一个管理员用户
+func initAdminUser() error {
+	var count int64
+	err := db.Model(&model.User{}).Count(&count).Error
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+
+	user := &model.User{
+		Username: "admin",
+		Password: "admin",
+		Role:     model.UserRoleAdmin,
+	}
+
+	return db.Create(user).Error
 }
