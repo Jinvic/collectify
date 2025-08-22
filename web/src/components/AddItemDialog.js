@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, FormControl, InputLabel, Select, MenuItem,
-  Typography, Box, CircularProgress, Alert, FormControlLabel, Checkbox
+  Typography, Box, CircularProgress, Alert, FormControlLabel, Checkbox,
+  Snackbar
 } from '@mui/material';
 import { useCreateItem } from '../hooks/useItems';
 import { useCategories } from '../hooks/useCategories';
@@ -11,7 +12,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
   const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useCategories();
   const categories = categoriesData?.data?.list || [];
   
-  const { mutate: createItem, isLoading: isCreating } = useCreateItem();
+  const { mutate: createItem, isLoading: isCreating, error: createError } = useCreateItem();
   
   const [selectedCategory, setSelectedCategory] = useState('');
   const [itemData, setItemData] = useState({
@@ -24,6 +25,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
     source_url: '',
     priority: 0
   });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const handleCategoryChange = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -63,10 +65,17 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
         },
         onError: (error) => {
           console.error("Failed to create item:", error);
-          // TODO: Show error to user
+          setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
         }
       });
     }
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -74,6 +83,7 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
       <DialogTitle>Add New Item</DialogTitle>
       <DialogContent>
         {categoriesError && <Alert severity="error">{categoriesError.message}</Alert>}
+        {createError && <Alert severity="error">{createError.message}</Alert>}
         
         <Box mt={1}>
           <FormControl fullWidth margin="normal" required>
@@ -200,6 +210,14 @@ const AddItemDialog = ({ open, onClose, onItemAdded }) => {
           {isCreating ? <CircularProgress size={24} /> : 'Create'}
         </Button>
       </DialogActions>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={snackbar.message}
+      />
     </Dialog>
   );
 };

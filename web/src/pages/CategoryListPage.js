@@ -5,17 +5,18 @@ import { Link } from 'react-router-dom';
 import {
   Container, Typography, Box, List, ListItem, ListItemText, ListItemSecondaryAction,
   IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, CircularProgress, Alert
+  TextField, CircularProgress, Alert, Snackbar
 } from '@mui/material';
 import { Edit, Add } from '@mui/icons-material';
 
 const CategoryListPage = () => {
   const { data, isLoading, error } = useCategories();
   const categories = data?.data?.list || [];
-  const { mutate: createCategory, isLoading: isCreating } = useCreateCategory();
+  const { mutate: createCategory, isLoading: isCreating, error: createError } = useCreateCategory();
 
   const [open, setOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -31,13 +32,21 @@ const CategoryListPage = () => {
       createCategory({ name: newCategoryName }, {
         onSuccess: () => {
           handleClose();
+          setSnackbar({ open: true, message: 'Category created successfully!', severity: 'success' });
         },
         onError: (error) => {
           console.error("Failed to create category:", error);
-          // TODO: Show error to user, e.g., with a snackbar
+          setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
         }
       });
     }
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -48,6 +57,7 @@ const CategoryListPage = () => {
         </Typography>
 
         {error && <Alert severity="error">{error.message}</Alert>}
+        {createError && <Alert severity="error">{createError.message}</Alert>}
         {isLoading && <CircularProgress />}
 
         <List>
@@ -108,6 +118,14 @@ const CategoryListPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={snackbar.message}
+      />
     </Container>
   );
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useBasicItems } from '../hooks/useItems';
 import ItemList from '../components/ItemList';
 import AddItemDialog from '../components/AddItemDialog';
-import { Container, Typography, Box, Button } from '@mui/material';
+import { Container, Typography, Box, Button, Snackbar } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
 const HomePage = () => {
@@ -13,6 +13,7 @@ const HomePage = () => {
   const total = data?.data?.total || 0;
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const handlePageChange = (newPage) => {
     refetch({ ...defaultParams, page: newPage });
@@ -21,6 +22,14 @@ const HomePage = () => {
   const handleItemAdded = () => {
     // Refresh the item list after adding a new item
     refetch();
+    setSnackbar({ open: true, message: 'Item added successfully!', severity: 'success' });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -55,6 +64,14 @@ const HomePage = () => {
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
         onItemAdded={handleItemAdded}
+      />
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={snackbar.message}
       />
     </Container>
   );

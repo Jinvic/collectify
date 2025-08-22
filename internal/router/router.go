@@ -75,6 +75,10 @@ func initItemRouter(router *gin.RouterGroup) {
 func initUserRouter(router *gin.RouterGroup) {
 	user := router.Group("/user")
 	{
-		user.POST("/login", handler.Login)
+		user.POST("/login", handler.UserLogin)
+		user.GET("/enabled", handler.IsAuthEnabled)
+
+		user.Use(middleware.AuthCheck)
+		user.POST("/update", handler.UserUpdate)
 	}
 }

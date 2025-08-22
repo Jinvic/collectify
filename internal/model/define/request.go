@@ -64,3 +64,9 @@ type LoginReq struct {
 	Username string `json:"username" form:"username" binding:"required"`
 	Password string `json:"password" form:"password" binding:"required"`
 }
+
+type UpdateUserReq struct {
+	ID       uint   `json:"id" form:"id" binding:"required,gt=0"`
+	Username string `json:"username" form:"username" binding:"required"`
+	Password string `json:"password" form:"password" binding:"required"`
+}

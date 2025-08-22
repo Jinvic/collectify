@@ -20,6 +20,7 @@ func AuthCheck(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
 		handler.Fail(c, e.ErrUnauthorized)
+		c.Abort()
 		return
 	}
 
@@ -29,6 +30,7 @@ func AuthCheck(c *gin.Context) {
 	})
 	if err != nil {
 		handler.Fail(c, e.ErrUnauthorized)
+		c.Abort()
 		return
 	}
 
@@ -42,4 +44,5 @@ func AuthCheck(c *gin.Context) {
 	}
 
 	handler.Fail(c, e.ErrUnauthorized)
+	c.Abort()
 }

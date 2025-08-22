@@ -1,4 +1,3 @@
-// src/services/apiClient.js
 import axios from 'axios';
 
 // Determine the base URL based on the environment
@@ -15,14 +14,14 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor (optional)
+// Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // You can add auth tokens here if needed in the future
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Get token from localStorage
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = token;
+    }
     return config;
   },
   (error) => {
@@ -30,17 +29,45 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor (optional, for global error handling)
+// Response interceptor to handle errors
 apiClient.interceptors.response.use(
   (response) => {
-    // Any status code that lie within the range of 2xx cause this function to trigger
+    // If response has success code, return data directly
+    if (response.data && response.data.code === 0) {
+      return response.data;
+    }
+    
+    // If response has fail code, throw error
+    if (response.data && response.data.code === 1) {
+      throw new Error(response.data.msg || 'Request failed');
+    }
+    
     return response;
   },
   (error) => {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    console.error('API Error:', error.response?.data?.msg || error.message);
-    // You could dispatch a global error action here if using a state management library
-    return Promise.reject(error);
+    // Handle network errors
+    if (!error.response) {
+      throw new Error('Network error. Please check your connection.');
+    }
+    
+    // Handle HTTP errors
+    const { status, data } = error.response;
+    
+    // Handle unauthorized access
+    if (status === 401 || (data && data.code === 1 && data.msg === '未登录')) {
+      // Clear local auth data
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // Redirect to login or show login prompt
+      window.dispatchEvent(new Event('unauthorized'));
+      
+      throw new Error('请先登录');
+    }
+    
+    // Handle other errors
+    const message = data?.msg || data?.message || `HTTP Error: ${status}`;
+    throw new Error(message);
   }
 );
 

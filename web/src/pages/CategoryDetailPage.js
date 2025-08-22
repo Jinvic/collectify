@@ -9,7 +9,8 @@ import { getFieldTypeName } from '../utils/itemUtils';
 import {
   Container, Typography, Box, CircularProgress, Alert, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton,
+  Snackbar
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 
@@ -20,9 +21,9 @@ const CategoryDetailPage = () => {
   const { data: categoryData, isLoading: isCategoryLoading, error: categoryError } = useCategory(categoryId);
   const category = categoryData?.data;
   
-  const { mutate: renameCategory } = useRenameCategory();
-  const { mutate: createField } = useCreateField();
-  const { mutate: deleteField } = useDeleteField();
+  const { mutate: renameCategory, error: renameError } = useRenameCategory();
+  const { mutate: createField, error: createFieldError } = useCreateField();
+  const { mutate: deleteField, error: deleteFieldError } = useDeleteField();
 
   const defaultSearchParams = { category_id: categoryId, page: 1, page_size: 10 };
   const { data: itemsData, isLoading: isItemsLoading, error: itemsError, refetch: refetchItems } = useSearchItems(defaultSearchParams);
@@ -33,6 +34,7 @@ const CategoryDetailPage = () => {
   const [newName, setNewName] = useState(category?.name || '');
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [newField, setNewField] = useState({ name: '', type: 1, is_array: false, required: false });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Sync category name when data loads
   React.useEffect(() => {
@@ -46,10 +48,11 @@ const CategoryDetailPage = () => {
       renameCategory({ id: categoryId, name: newName }, {
         onSuccess: () => {
           setEditName(false);
+          setSnackbar({ open: true, message: 'Category renamed successfully!', severity: 'success' });
         },
         onError: (error) => {
           console.error("Failed to rename category:", error);
-          // TODO: Show error to user
+          setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
         }
       });
     } else {
@@ -60,13 +63,13 @@ const CategoryDetailPage = () => {
   const handleCreateField = () => {
     // Prevent creating boolean array fields
     if (newField.type === 3 && newField.is_array) {
-      alert("Boolean type fields cannot be arrays.");
+      setSnackbar({ open: true, message: 'Boolean type fields cannot be arrays.', severity: 'warning' });
       return;
     }
     
     // Prevent creating datetime array fields
     if (newField.type === 4 && newField.is_array) {
-      alert("Datetime type fields cannot be arrays.");
+      setSnackbar({ open: true, message: 'Datetime type fields cannot be arrays.', severity: 'warning' });
       return;
     }
     
@@ -75,10 +78,11 @@ const CategoryDetailPage = () => {
         onSuccess: () => {
           setOpenFieldDialog(false);
           setNewField({ name: '', type: 1, is_array: false, required: false });
+          setSnackbar({ open: true, message: 'Field created successfully!', severity: 'success' });
         },
         onError: (error) => {
           console.error("Failed to create field:", error);
-          alert(`Failed to create field: ${error.message}`);
+          setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
         }
       });
     }
@@ -88,9 +92,12 @@ const CategoryDetailPage = () => {
     // Simple confirmation, could be improved with a proper dialog
     if (window.confirm('Are you sure you want to delete this field?')) {
       deleteField(fieldId, {
+        onSuccess: () => {
+          setSnackbar({ open: true, message: 'Field deleted successfully!', severity: 'success' });
+        },
         onError: (error) => {
           console.error("Failed to delete field:", error);
-          // TODO: Show error to user
+          setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
         }
       });
     }
@@ -100,13 +107,45 @@ const CategoryDetailPage = () => {
     refetchItems({ ...defaultSearchParams, page: newPage });
   };
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   if (isCategoryLoading) return <CircularProgress />;
-  if (categoryError) return <Alert severity="error">{categoryError.message}</Alert>;
-  if (!category) return <Alert severity="warning">Category not found.</Alert>;
+  
+  if (categoryError) {
+    return (
+      <Container maxWidth="lg">
+        <Box my={4}>
+          <Alert severity="error">{categoryError.message}</Alert>
+        </Box>
+      </Container>
+    );
+  }
+  
+  if (!category) {
+    return (
+      <Container maxWidth="lg">
+        <Box my={4}>
+          <Alert severity="warning">Category not found.</Alert>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
       <Box my={4}>
+        {/* Error alerts */}
+        {(renameError || createFieldError || deleteFieldError) && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {renameError?.message || createFieldError?.message || deleteFieldError?.message}
+          </Alert>
+        )}
+        
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           {editName ? (
             <TextField
@@ -252,6 +291,14 @@ const CategoryDetailPage = () => {
           <Button onClick={handleCreateField} disabled={!newField.name.trim()}>Add</Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={snackbar.message}
+      />
     </Container>
   );
 };

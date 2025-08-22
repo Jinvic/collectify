@@ -18,8 +18,8 @@ const ItemDetailPage = () => {
   const { data, isLoading, error, refetch } = useItem(itemId);
   const item = data?.data;
   
-  const { mutate: updateItem, isLoading: isUpdating } = useUpdateItem();
-  const { mutate: deleteItem } = useDeleteItem();
+  const { mutate: updateItem, isLoading: isUpdating, error: updateError } = useUpdateItem();
+  const { mutate: deleteItem, error: deleteError } = useDeleteItem();
 
   const [editMode, setEditMode] = useState(false);
   const [editedItem, setEditedItem] = useState({});
@@ -118,12 +118,37 @@ const ItemDetailPage = () => {
   };
 
   if (isLoading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error.message}</Alert>;
-  if (!item) return <Alert severity="warning">Item not found.</Alert>;
+  
+  if (error) {
+    return (
+      <Container maxWidth="md">
+        <Box my={4}>
+          <Alert severity="error">{error.message}</Alert>
+        </Box>
+      </Container>
+    );
+  }
+  
+  if (!item) {
+    return (
+      <Container maxWidth="md">
+        <Box my={4}>
+          <Alert severity="warning">Item not found.</Alert>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md">
       <Box my={4}>
+        {/* Error alerts */}
+        {(updateError || deleteError) && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {updateError?.message || deleteError?.message}
+          </Alert>
+        )}
+        
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h4" component="h1">
             {editMode ? 'Edit Item' : item.name}
