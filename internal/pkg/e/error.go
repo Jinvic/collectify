@@ -39,4 +39,14 @@ var (
 	ErrNotFound = EStruct{
 		err: errors.New("目标不存在"),
 	}
+
+	ErrUnauthorized = EStruct{
+		err: errors.New("未授权"),
+	}
+	ErrUserNotFound = EStruct{
+		err: errors.New("用户不存在"),
+	}
+	ErrUserInvalidPassword = EStruct{
+		err: errors.New("用户名或密码错误"),
+	}
 )

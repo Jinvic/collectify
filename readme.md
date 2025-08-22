@@ -16,6 +16,7 @@
 * **回收站**: 可选的回收站功能，防止误删数据。
 * **RESTful API**: 提供 API 接口，方便与其他系统集成。
 * **Docker 支持**: 提供 Dockerfile 和 docker-compose.yml，方便部署。
+* **简单鉴权**: 可选的用户认证功能，保护您的收藏数据。
 
 ## 快速开始
 
@@ -43,6 +44,9 @@
 2. **配置环境变量**:
     * 复制 `.env.example` 文件为 `.env`。
     * 根据需要修改 `.env` 文件中的配置。
+    * 如果要启用认证功能，需要设置 `COLLECTIFY_AUTH_ENABLE=true`，并配置 `COLLECTIFY_AUTH_JWT_SECRET`。
+      * 在生产环境中，必须手动设置 JWT 密钥。
+      * 在开发环境中，如果不设置 JWT 密钥，系统会自动生成一个随机密钥。
 
 3. **启动服务**:
 

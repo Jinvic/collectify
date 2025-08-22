@@ -59,3 +59,8 @@ type SearchItemsReq struct {
 	TagIDs        []uint `json:"tag_ids" form:"tag_ids"`
 	CollectionIDs []uint `json:"collection_ids" form:"collection_ids"`
 }
+
+type LoginReq struct {
+	Username string `json:"username" form:"username" binding:"required"`
+	Password string `json:"password" form:"password" binding:"required"`
+}
