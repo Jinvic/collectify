@@ -61,6 +61,14 @@
     * Web UI: `http://localhost:8080`
     * API: `http://localhost:8080/api/`
 
+### 下载二进制文件
+
+可以在 [Release](https://github.com/Jinvic/collectify/releases) 页面下载对应平台编译好的二进制文件使用，需要在命令行中运行。
+
+配置环境变量也是使用 `.env` 文件，详情见上。
+
+启动后直接访问 `http://localhost:8080` 即可。
+
 ### 本地开发
 
 #### 后端
@@ -75,7 +83,7 @@
         go build -o collectify .
         ./collectify # (Linux/macOS)
         # 或
-        collectify.exe # (Windows)
+        ./collectify.exe # (Windows)
         ```
 
 #### 前端 (Web UI)
@@ -142,8 +150,7 @@
 * [ ] 标签
 * [ ] 收藏夹
 * [ ] 回收站
-* [x] 简单鉴权 (JWT)
-* [ ] 细化鉴权
+* [x] 用户鉴权 (JWT)
 * [ ] 字段关联藏品
 * [ ] 藏品设置私密
 * [ ] 名称别名（支持搜索）
