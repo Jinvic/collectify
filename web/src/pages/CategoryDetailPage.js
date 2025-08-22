@@ -1,7 +1,7 @@
 // src/pages/CategoryDetailPage.js
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useCategory, useRenameCategory } from '../hooks/useCategories';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useCategory, useRenameCategory, useDeleteCategory } from '../hooks/useCategories';
 import { useCreateField, useDeleteField } from '../hooks/useFields';
 import { useSearchItems } from '../hooks/useItems';
 import ItemList from '../components/ItemList';
@@ -15,6 +15,7 @@ import {
 import { Edit, Delete, Add } from '@mui/icons-material';
 
 const CategoryDetailPage = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const categoryId = parseInt(id, 10);
 
@@ -22,6 +23,7 @@ const CategoryDetailPage = () => {
   const category = categoryData?.data;
   
   const { mutate: renameCategory, error: renameError } = useRenameCategory();
+  const { mutate: deleteCategory, error: deleteCategoryError } = useDeleteCategory();
   const { mutate: createField, error: createFieldError } = useCreateField();
   const { mutate: deleteField, error: deleteFieldError } = useDeleteField();
 
@@ -34,6 +36,7 @@ const CategoryDetailPage = () => {
   const [newName, setNewName] = useState(category?.name || '');
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [newField, setNewField] = useState({ name: '', type: 1, is_array: false, required: false });
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Sync category name when data loads
@@ -58,6 +61,22 @@ const CategoryDetailPage = () => {
     } else {
       setEditName(false);
     }
+  };
+
+  const handleDelete = () => {
+    deleteCategory(categoryId, {
+      onSuccess: () => {
+        setOpenDeleteDialog(false);
+        setSnackbar({ open: true, message: 'Category deleted successfully!', severity: 'success' });
+        // Navigate back to categories list
+        navigate('/categories');
+      },
+      onError: (error) => {
+        console.error("Failed to delete category:", error);
+        setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
+        setOpenDeleteDialog(false);
+      }
+    });
   };
 
   const handleCreateField = () => {
@@ -140,13 +159,13 @@ const CategoryDetailPage = () => {
     <Container maxWidth="lg">
       <Box my={4}>
         {/* Error alerts */}
-        {(renameError || createFieldError || deleteFieldError) && (
+        {(renameError || createFieldError || deleteFieldError || deleteCategoryError) && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {renameError?.message || createFieldError?.message || deleteFieldError?.message}
+            {renameError?.message || createFieldError?.message || deleteFieldError?.message || deleteCategoryError?.message}
           </Alert>
         )}
         
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           {editName ? (
             <TextField
               value={newName}
@@ -162,9 +181,18 @@ const CategoryDetailPage = () => {
               {category.name}
             </Typography>
           )}
-          <IconButton onClick={() => setEditName(true)} size="small">
-            <Edit />
-          </IconButton>
+          <Box>
+            <IconButton onClick={() => setEditName(true)} size="small" sx={{ mr: 1 }}>
+              <Edit />
+            </IconButton>
+            <IconButton 
+              onClick={() => setOpenDeleteDialog(true)} 
+              size="small"
+              color="error"
+            >
+              <Delete />
+            </IconButton>
+          </Box>
         </Box>
 
         <Typography variant="h6" gutterBottom>
@@ -289,6 +317,27 @@ const CategoryDetailPage = () => {
         <DialogActions>
           <Button onClick={() => setOpenFieldDialog(false)}>Cancel</Button>
           <Button onClick={handleCreateField} disabled={!newField.name.trim()}>Add</Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography id="delete-dialog-description">
+            Are you sure you want to delete "{category.name}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={handleDelete} color="error" variant="contained">
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
       

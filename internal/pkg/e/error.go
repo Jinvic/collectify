@@ -41,7 +41,7 @@ var (
 	}
 
 	ErrUnauthorized = EStruct{
-		err: errors.New("未登录"),
+		err: errors.New("未授权"),
 	}
 	ErrUserNotFound = EStruct{
 		err: errors.New("用户不存在"),
