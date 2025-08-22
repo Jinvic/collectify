@@ -124,11 +124,19 @@ const Navbar = () => {
           {user ? (
             <>
               <Button
-                color="inherit"
-                variant="outlined"
+                color="secondary"
+                variant="contained"
                 onClick={handleMenuOpen}
                 aria-controls="user-menu"
                 aria-haspopup="true"
+                sx={{
+                  fontWeight: 'bold',
+                  textTransform: 'none',
+                  boxShadow: 3,
+                  '&:hover': {
+                    boxShadow: 6,
+                  }
+                }}
               >
                 {user.username}
               </Button>
@@ -158,9 +166,17 @@ const Navbar = () => {
             </>
           ) : (
             <Button
-              color="inherit"
-              variant="outlined"
+              color="secondary"
+              variant="contained"
               onClick={() => setLoginOpen(true)}
+              sx={{
+                fontWeight: 'bold',
+                textTransform: 'none',
+                boxShadow: 3,
+                '&:hover': {
+                  boxShadow: 6,
+                }
+              }}
             >
               Login
             </Button>
