@@ -43,7 +43,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := service.Login(user)
+	token, err := service.GenerateToken(user, 0)
 	if err != nil {
 		Fail(c, err)
 		return

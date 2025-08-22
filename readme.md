@@ -126,6 +126,7 @@
   * [SQLite](https://www.sqlite.org/) (数据库)
   * [env](https://github.com/caarlos0/env) (配置)
   * [Cobra](https://github.com/spf13/cobra) (CLI)
+  * [JWT](https://github.com/golang-jwt/jwt/v5) (鉴权)
 * **前端**:
   * [React](https://reactjs.org/)
   * [React Router](https://reactrouter.com/)
@@ -138,7 +139,11 @@
 * [ ] 标签
 * [ ] 收藏夹
 * [ ] 回收站
-* [ ] 简单鉴权
+* [x] 简单鉴权 (JWT)
+* [ ] 细化鉴权
+* [ ] 字段关联藏品
+* [ ] 藏品设置私密
+* [ ] 名称别名（支持搜索）
 
 ## ~~Q&A~~ 碎碎念
 

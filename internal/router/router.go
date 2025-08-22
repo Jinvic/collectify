@@ -2,6 +2,7 @@ package router
 
 import (
 	"collectify/internal/handler"
+	"collectify/internal/middleware"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ func InitRouter() *gin.Engine {
 		initCategoryRouter(api)
 		initFieldRouter(api)
 		initItemRouter(api)
+		initUserRouter(api)
 	}
 
 	// 初始化前端路由
@@ -34,11 +36,13 @@ func InitRouter() *gin.Engine {
 func initCategoryRouter(router *gin.RouterGroup) {
 	category := router.Group("/category")
 	{
-		category.POST("", handler.CreateCategory)
 		category.GET("/:id", handler.GetCategory)
+		category.GET("/list", handler.ListCategory)
+
+		category.Use(middleware.AuthCheck)
+		category.POST("", handler.CreateCategory)
 		category.PATCH("/:id", handler.RenameCategory)
 		category.DELETE("/:id", handler.DeleteCategory)
-		category.GET("/list", handler.ListCategory)
 		category.POST("/:id/restore", handler.RestoreCategory)
 	}
 }
@@ -46,6 +50,7 @@ func initCategoryRouter(router *gin.RouterGroup) {
 func initFieldRouter(router *gin.RouterGroup) {
 	field := router.Group("/field")
 	{
+		field.Use(middleware.AuthCheck)
 		field.POST("", handler.CreateField)
 		field.DELETE("/:id", handler.DeleteField)
 		field.POST("/:id/restore", handler.RestoreField)
@@ -55,12 +60,21 @@ func initFieldRouter(router *gin.RouterGroup) {
 func initItemRouter(router *gin.RouterGroup) {
 	item := router.Group("/item")
 	{
+		item.GET("/list", handler.ListItems)
+		item.POST("/search", handler.SearchItems)
+		item.GET("/:id", handler.GetItem)
+
+		item.Use(middleware.AuthCheck)
 		item.POST("", handler.CreateItem)
 		item.DELETE("/:id", handler.DeleteItem)
 		item.PUT("/:id", handler.UpdateItem)
 		item.POST("/:id/restore", handler.RestoreItem)
-		item.GET("/list", handler.ListItems)
-		item.POST("/search", handler.SearchItems)
-		item.GET("/:id", handler.GetItem)
+	}
+}
+
+func initUserRouter(router *gin.RouterGroup) {
+	user := router.Group("/user")
+	{
+		user.POST("/login", handler.Login)
 	}
 }
