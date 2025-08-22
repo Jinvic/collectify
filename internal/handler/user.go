@@ -8,14 +8,17 @@ import (
 	e "collectify/internal/pkg/e"
 	"collectify/internal/service"
 	"errors"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 func Login(c *gin.Context) {
+	cfg := config.GetConfig()
+
 	// 如果未启用认证，则直接返回成功
-	if !config.GetConfig().Auth.Enable {
+	if !cfg.Auth.Enable {
 		Success(c)
 		return
 	}
@@ -43,7 +46,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := service.GenerateToken(user, 0)
+	expireTime := time.Duration(cfg.Auth.ExpireDay) * time.Hour * 24
+	token, err := service.GenerateToken(user, expireTime)
 	if err != nil {
 		Fail(c, err)
 		return

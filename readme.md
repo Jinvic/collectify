@@ -47,6 +47,9 @@
     * 如果要启用认证功能，需要设置 `COLLECTIFY_AUTH_ENABLE=true`，并配置 `COLLECTIFY_AUTH_JWT_SECRET`。
       * 在生产环境中，必须手动设置 JWT 密钥。
       * 在开发环境中，如果不设置 JWT 密钥，系统会自动生成一个随机密钥。
+    * 可以通过 `COLLECTIFY_AUTH_EXPIRE_DAY` 设置 JWT token 的过期时间（单位：天）。
+      * 设置为 0 表示 token 永久有效（无过期时间）。
+      * 默认值为 15 天。
 
 3. **启动服务**:
 

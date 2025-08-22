@@ -16,3 +16,4 @@ services:
       # - COLLECTIFY_RECYCLEBIN_ENABLE=false
       # - COLLECTIFY_AUTH_ENABLE=false
       # - COLLECTIFY_AUTH_JWT_SECRET=your-super-secret-jwt-key-here
+      # - COLLECTIFY_AUTH_EXPIRE_DAY=15
