@@ -84,29 +84,37 @@ func UserUpdate(c *gin.Context) {
 		return
 	}
 
-	// 检查是否重复
-	uniqueFields := map[string]interface{}{"username": req.Username}
-	filters := []dao.Filter{}
-	id, isDeleted, err := dao.DuplicateCheck[model.User](conn.GetDB(), uniqueFields, filters)
-	if err != nil {
-		Fail(c, err)
-		return
-	}
-	if id != 0 {
-		FailWithData(c, e.ErrDuplicated, map[string]interface{}{
-			"id":        id,
-			"isDeleted": isDeleted,
-		})
-		return
+	oldUsername := c.GetString("user_username")
+
+	// 如果旧用户名和新用户名不同，则检查是否重复
+	if oldUsername != req.Username {
+		uniqueFields := map[string]interface{}{"username": req.Username}
+		filters := []dao.Filter{}
+		id, isDeleted, err := dao.DuplicateCheck[model.User](conn.GetDB(), uniqueFields, filters)
+		if err != nil {
+			Fail(c, err)
+			return
+		}
+		if id != 0 {
+			FailWithData(c, e.ErrDuplicated, map[string]interface{}{
+				"id":        id,
+				"isDeleted": isDeleted,
+			})
+			return
+		}
 	}
 
-	uniqueFields = map[string]interface{}{"id": req.ID}
+	uniqueFields := map[string]interface{}{"id": req.ID}
 	updateFields := map[string]interface{}{
 		"username": req.Username,
-		"password": req.Password,
 	}
 
-	err = dao.Update[model.User](conn.GetDB(), uniqueFields, updateFields)
+	// 如果密码不为空，则更新密码
+	if req.Password != "" {
+		updateFields["password"] = req.Password
+	}
+
+	err := dao.Update[model.User](conn.GetDB(), uniqueFields, updateFields)
 	if err != nil {
 		Fail(c, err)
 		return
