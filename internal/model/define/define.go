@@ -174,6 +174,7 @@ func (t *Tag) FromDB(tag *model.Tag) {
 type Collection struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
+	Description string `json:"description"`
 }
 
 func (c *Collection) FromDB(collection *model.Collection) {

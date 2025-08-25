@@ -70,3 +70,21 @@ type UpdateUserReq struct {
 	Username string `json:"username" form:"username" binding:"required"`
 	Password string `json:"password" form:"password"`
 }
+
+type CreateTagReq struct {
+	Name string `json:"name" form:"name" binding:"required"`
+}
+
+type RenameTagReq struct {
+	Name string `json:"name" form:"name" binding:"required"`
+}
+
+type CreateCollectionReq struct {
+	Name        string `json:"name" form:"name" binding:"required"`
+	Description string `json:"description" form:"description"`
+}
+
+type UpdateCollectionReq struct {
+	Name        string `json:"name" form:"name"`
+	Description string `json:"description" form:"description"`
+}

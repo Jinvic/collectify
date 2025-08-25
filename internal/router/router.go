@@ -18,12 +18,14 @@ func InitRouter() *gin.Engine {
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(corsConfig))
 
-	// 先注册 API 路由
+	// 注册 API 路由
 	api := r.Group("/api")
 	{
 		initCategoryRouter(api)
+		initCollectionRouter(api)
 		initFieldRouter(api)
 		initItemRouter(api)
+		initTagRouter(api)
 		initUserRouter(api)
 	}
 
@@ -44,6 +46,20 @@ func initCategoryRouter(router *gin.RouterGroup) {
 		category.PATCH("/:id", handler.RenameCategory)
 		category.DELETE("/:id", handler.DeleteCategory)
 		category.POST("/:id/restore", handler.RestoreCategory)
+	}
+}
+
+func initCollectionRouter(router *gin.RouterGroup) {
+	collection := router.Group("/collection")
+	{
+		collection.GET("/:id", handler.GetCollection)
+		collection.GET("/list", handler.ListCollection)
+
+		collection.Use(middleware.AuthCheck)
+		collection.POST("", handler.CreateCollection)
+		collection.PATCH("/:id", handler.UpdateCollection)
+		collection.DELETE("/:id", handler.DeleteCollection)
+		collection.POST("/:id/restore", handler.RestoreCollection)
 	}
 }
 
@@ -69,6 +85,20 @@ func initItemRouter(router *gin.RouterGroup) {
 		item.DELETE("/:id", handler.DeleteItem)
 		item.PUT("/:id", handler.UpdateItem)
 		item.POST("/:id/restore", handler.RestoreItem)
+	}
+}
+
+func initTagRouter(router *gin.RouterGroup) {
+	tag := router.Group("/tag")
+	{
+		tag.GET("/:id", handler.GetTag)
+		tag.GET("/list", handler.ListTag)
+
+		tag.Use(middleware.AuthCheck)
+		tag.POST("", handler.CreateTag)
+		tag.PATCH("/:id", handler.RenameTag)
+		tag.DELETE("/:id", handler.DeleteTag)
+		tag.POST("/:id/restore", handler.RestoreTag)
 	}
 }
 
