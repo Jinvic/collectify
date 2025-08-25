@@ -2,14 +2,18 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useItem, useUpdateItem, useDeleteItem } from '../hooks/useItems';
+import { useTags } from '../hooks/useTags'; // For getting available tags
+import { useCollections } from '../hooks/useCollections'; // For getting available collections
+import { useAddTagToItem, useRemoveTagFromItem, useAddItemToCollection, useRemoveItemFromCollection } from '../hooks/useItemAssociations';
 import { formatFieldValue, getFieldTypeName } from '../utils/itemUtils';
 import { formatDate } from '../utils/formatDate';
 import {
   Container, Typography, Box, CircularProgress, Alert, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem,
-  FormControlLabel, Checkbox, Paper, Divider, IconButton, Snackbar, Alert as MuiAlert
+  FormControlLabel, Checkbox, Paper, Divider, IconButton, Snackbar, Alert as MuiAlert,
+  Chip, Autocomplete
 } from '@mui/material';
-import { Edit, Delete, Save, Cancel } from '@mui/icons-material';
+import { Edit, Delete, Save, Cancel, Label, CollectionsBookmark } from '@mui/icons-material';
 
 const ItemDetailPage = () => {
   const { id } = useParams();
@@ -20,6 +24,18 @@ const ItemDetailPage = () => {
   
   const { mutate: updateItem, isLoading: isUpdating, error: updateError } = useUpdateItem();
   const { mutate: deleteItem, error: deleteError } = useDeleteItem();
+  
+  // Hooks for item associations
+  const { mutate: addTagToItem } = useAddTagToItem();
+  const { mutate: removeTagFromItem } = useRemoveTagFromItem();
+  const { mutate: addItemToCollection } = useAddItemToCollection();
+  const { mutate: removeItemFromCollection } = useRemoveItemFromCollection();
+  
+  // Get available tags and collections
+  const { data: tagsData } = useTags();
+  const { data: collectionsData } = useCollections();
+  const availableTags = tagsData?.data?.list || [];
+  const availableCollections = collectionsData?.data?.list || [];
 
   const [editMode, setEditMode] = useState(false);
   const [editedItem, setEditedItem] = useState({});
@@ -107,6 +123,70 @@ const ItemDetailPage = () => {
         console.error("Failed to delete item:", error);
         setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
       }
+    });
+  };
+
+  // Handle tag selection
+  const handleTagChange = (event, newValue) => {
+    // Find which tag was added/removed
+    const currentItemTagIds = item.tags?.map(tag => tag.id) || [];
+    const newItemTagIds = newValue.map(tag => tag.id);
+    
+    // Find added tags
+    const addedTags = newValue.filter(tag => !currentItemTagIds.includes(tag.id));
+    // Find removed tags
+    const removedTags = item.tags?.filter(tag => !newItemTagIds.includes(tag.id)) || [];
+    
+    // Add new tags
+    addedTags.forEach(tag => {
+      addTagToItem({ itemId, tagId: tag.id }, {
+        onError: (error) => {
+          console.error("Failed to add tag to item:", error);
+          setSnackbar({ open: true, message: `Error adding tag ${tag.name}: ${error.message}`, severity: 'error' });
+        }
+      });
+    });
+    
+    // Remove tags
+    removedTags.forEach(tag => {
+      removeTagFromItem({ itemId, tagId: tag.id }, {
+        onError: (error) => {
+          console.error("Failed to remove tag from item:", error);
+          setSnackbar({ open: true, message: `Error removing tag ${tag.name}: ${error.message}`, severity: 'error' });
+        }
+      });
+    });
+  };
+
+  // Handle collection selection
+  const handleCollectionChange = (event, newValue) => {
+    // Find which collection was added/removed
+    const currentItemCollectionIds = item.collections?.map(collection => collection.id) || [];
+    const newItemCollectionIds = newValue.map(collection => collection.id);
+    
+    // Find added collections
+    const addedCollections = newValue.filter(collection => !currentItemCollectionIds.includes(collection.id));
+    // Find removed collections
+    const removedCollections = item.collections?.filter(collection => !newItemCollectionIds.includes(collection.id)) || [];
+    
+    // Add to new collections
+    addedCollections.forEach(collection => {
+      addItemToCollection({ itemId, collectionId: collection.id }, {
+        onError: (error) => {
+          console.error("Failed to add item to collection:", error);
+          setSnackbar({ open: true, message: `Error adding to collection ${collection.name}: ${error.message}`, severity: 'error' });
+        }
+      });
+    });
+    
+    // Remove from collections
+    removedCollections.forEach(collection => {
+      removeItemFromCollection({ itemId, collectionId: collection.id }, {
+        onError: (error) => {
+          console.error("Failed to remove item from collection:", error);
+          setSnackbar({ open: true, message: `Error removing from collection ${collection.name}: ${error.message}`, severity: 'error' });
+        }
+      });
     });
   };
 
@@ -354,6 +434,64 @@ const ItemDetailPage = () => {
                 <Typography><strong>Source:</strong> <a href={item.source_url} target="_blank" rel="noopener noreferrer">{item.source_url}</a></Typography>
               </Box>
             )}
+
+            <Divider sx={{ my: 2 }} />
+            
+            {/* Tags Section */}
+            <Box display="flex" alignItems="center" mb={2}>
+              <Label sx={{ mr: 1 }} />
+              <Typography variant="h6" gutterBottom>
+                Tags
+              </Typography>
+            </Box>
+            <Autocomplete
+              multiple
+              options={availableTags}
+              getOptionLabel={(option) => option.name}
+              value={item.tags || []}
+              onChange={handleTagChange}
+              filterSelectedOptions
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    label={option.name}
+                    {...getTagProps({ index })}
+                    key={option.id}
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField {...params} placeholder="Select tags" />
+              )}
+            />
+
+            {/* Collections Section */}
+            <Box display="flex" alignItems="center" mt={3} mb={2}>
+              <CollectionsBookmark sx={{ mr: 1 }} />
+              <Typography variant="h6" gutterBottom>
+                Collections
+              </Typography>
+            </Box>
+            <Autocomplete
+              multiple
+              options={availableCollections}
+              getOptionLabel={(option) => option.name}
+              value={item.collections || []}
+              onChange={handleCollectionChange}
+              filterSelectedOptions
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    label={option.name}
+                    {...getTagProps({ index })}
+                    key={option.id}
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField {...params} placeholder="Select collections" />
+              )}
+            />
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="h6" gutterBottom>Custom Fields</Typography>
