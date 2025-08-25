@@ -83,7 +83,7 @@ func RestoreCategory(c *gin.Context) {
 }
 
 func RenameCategory(c *gin.Context) {
-	id, err := GetID(c, "id")
+	categoryID, err := GetID(c, "id")
 	if err != nil {
 		Fail(c, err)
 		return
@@ -102,7 +102,7 @@ func RenameCategory(c *gin.Context) {
 	filters := []dao.Filter{
 		{
 			Where: "id != ?",
-			Args:  []interface{}{id},
+			Args:  []interface{}{categoryID},
 		},
 	}
 	id, isDeleted, err := dao.DuplicateCheck[model.Category](conn.GetDB(), uniqueFields, filters)
@@ -118,7 +118,7 @@ func RenameCategory(c *gin.Context) {
 		return
 	}
 
-	uniqueFields = map[string]interface{}{"id": id}
+	uniqueFields = map[string]interface{}{"id": categoryID}
 	updateFields := map[string]interface{}{"name": req.Name}
 	err = dao.Update[model.Category](conn.GetDB(), uniqueFields, updateFields)
 	if err != nil {

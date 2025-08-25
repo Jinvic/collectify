@@ -85,7 +85,7 @@ func RestoreTag(c *gin.Context) {
 }
 
 func RenameTag(c *gin.Context) {
-	id, err := GetID(c, "id")
+	tagID, err := GetID(c, "id")
 	if err != nil {
 		Fail(c, err)
 		return
@@ -104,7 +104,7 @@ func RenameTag(c *gin.Context) {
 	filters := []dao.Filter{
 		{
 			Where: "id != ?",
-			Args:  []interface{}{id},
+			Args:  []interface{}{tagID},
 		},
 	}
 	id, isDeleted, err := dao.DuplicateCheck[model.Tag](conn.GetDB(), uniqueFields, filters)
@@ -120,7 +120,7 @@ func RenameTag(c *gin.Context) {
 		return
 	}
 
-	uniqueFields = map[string]interface{}{"id": id}
+	uniqueFields = map[string]interface{}{"id": tagID}
 	updateFields := map[string]interface{}{"name": req.Name}
 	err = dao.Update[model.Tag](conn.GetDB(), uniqueFields, updateFields)
 	if err != nil {
