@@ -129,11 +129,11 @@ func (i *ItemDetail) FromDB(item *model.Item) {
 }
 
 type Field struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
-	Type int    `json:"type"`
-	IsArray bool `json:"is_array"`
-	Required bool `json:"required"`
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Type     int    `json:"type"`
+	IsArray  bool   `json:"is_array"`
+	Required bool   `json:"required"`
 }
 
 func (f *Field) FromDB(field *model.Field) {
@@ -172,12 +172,13 @@ func (t *Tag) FromDB(tag *model.Tag) {
 }
 
 type Collection struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID          uint   `json:"id"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
 func (c *Collection) FromDB(collection *model.Collection) {
 	c.ID = collection.ID
 	c.Name = collection.Name
+	c.Description = collection.Description
 }
