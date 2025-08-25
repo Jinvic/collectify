@@ -184,7 +184,7 @@ func Associate[T1 model.GormModel, T2 model.GormModel](tx *gorm.DB, id1, id2 uin
 		return err
 	}
 
-	err = tx.Model(&t1).Association(association).Append(t2)
+	err = tx.Model(&t1).Association(association).Append(&t2)
 	if err != nil {
 		return err
 	}
@@ -205,7 +205,7 @@ func Disassociate[T1 model.GormModel, T2 model.GormModel](tx *gorm.DB, id1, id2 
 		return err
 	}
 
-	err = tx.Model(&t1).Association(association).Delete(t2)
+	err = tx.Model(&t1).Association(association).Delete(&t2)
 	if err != nil {
 		return err
 	}
