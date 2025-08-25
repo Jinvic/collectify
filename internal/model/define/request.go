@@ -11,10 +11,6 @@ type ListReq struct {
 	Page     int  `json:"page" form:"page"`
 	PageSize int  `json:"page_size" form:"page_size"`
 }
-type SearchReq struct {
-	ListReq
-	Filters map[uint]interface{} `json:"filters" form:"filters"`
-}
 
 type SearchFilterDatetime struct {
 	Start time.Time `json:"start" form:"start"`
@@ -53,11 +49,12 @@ type UpdateItemReq struct {
 }
 
 type SearchItemsReq struct {
-	SearchReq
-	CategoryID    uint   `json:"category_id" form:"category_id" binding:"required,gt=0"`
-	Name          string `json:"name" form:"name"`
-	TagIDs        []uint `json:"tag_ids" form:"tag_ids"`
-	CollectionIDs []uint `json:"collection_ids" form:"collection_ids"`
+	ListReq
+	CategoryID    uint                 `json:"category_id" form:"category_id"`
+	Name          string               `json:"name" form:"name"`
+	TagIDs        []uint               `json:"tag_ids" form:"tag_ids"`
+	CollectionIDs []uint               `json:"collection_ids" form:"collection_ids"`
+	Filters       map[uint]interface{} `json:"filters" form:"filters"`
 }
 
 type LoginReq struct {

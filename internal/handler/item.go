@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"collectify/internal/dao"
 	"collectify/internal/conn"
+	"collectify/internal/dao"
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
@@ -116,6 +116,11 @@ func SearchItems(c *gin.Context) {
 		Disable: req.NoPaging,
 		Page:    req.Page,
 		Size:    req.PageSize,
+	}
+
+	// 字段筛选仅在指定类别时可用
+	if req.CategoryID == 0 {
+		req.Filters = nil
 	}
 
 	items, total, err := service.SearchItems(req.CategoryID, req.Name, req.TagIDs, req.CollectionIDs, req.Filters, pagination)

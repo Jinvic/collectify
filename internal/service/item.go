@@ -2,8 +2,8 @@ package service
 
 import (
 	"collectify/internal/config"
-	"collectify/internal/dao"
 	"collectify/internal/conn"
+	"collectify/internal/dao"
 	"collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"
@@ -227,7 +227,7 @@ func ListItems(p common.Pagination) ([]model.Item, int64, error) {
 }
 
 // SearchItems 搜索收藏品
-func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []uint, fs map[uint]interface{}, p common.Pagination) ([]model.Item, int64, error) {
+func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []uint, fieldFilters map[uint]interface{}, p common.Pagination) ([]model.Item, int64, error) {
 	db := conn.GetDB()
 
 	// 预加载关联表
@@ -254,14 +254,16 @@ func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []ui
 		},
 	}
 
-	// 分类必选
-	filters := []dao.Filter{
-		{
+	
+	filters := []dao.Filter{}
+	
+	// 筛选条件
+	if categoryID > 0 {
+		filters = append(filters, dao.Filter{
 			Where: "items.category_id = ?",
 			Args:  []interface{}{categoryID},
-		},
+		})
 	}
-	// 名称可选
 	if name != "" {
 		filters = append(filters, dao.Filter{
 			Where: "items.name LIKE ?",
@@ -312,7 +314,7 @@ func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []ui
 		}
 
 		// 遍历并添加字段值过滤条件
-		for key, value := range fs {
+		for key, value := range fieldFilters {
 			field, ok := fieldMap[key]
 			if !ok {
 				return fmt.Errorf("field not found: %d", key)
