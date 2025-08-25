@@ -99,7 +99,11 @@ func createFileHandler(fs http.FileSystem) func(c *gin.Context, path string) {
 			c.AbortWithStatus(404)
 			return
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				log.Printf("关闭文件失败: %v", err)
+			}
+		}()
 
 		// 获取文件信息
 		stat, err := file.Stat()

@@ -37,9 +37,9 @@ type ConfigRecycleBin struct {
 }
 
 type ConfigAuth struct {
-	Enable     bool   `env:"AUTH_ENABLE" envDefault:"false"`
-	JwtSecret  string `env:"AUTH_JWT_SECRET"`
-	ExpireDay  int    `env:"AUTH_EXPIRE_DAY" envDefault:"15"`
+	Enable    bool   `env:"AUTH_ENABLE" envDefault:"false"`
+	JwtSecret string `env:"AUTH_JWT_SECRET"`
+	ExpireDay int    `env:"AUTH_EXPIRE_DAY" envDefault:"15"`
 }
 
 var config = &Config{}

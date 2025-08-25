@@ -1,8 +1,8 @@
 package service
 
 import (
-	"collectify/internal/dao"
 	"collectify/internal/conn"
+	"collectify/internal/dao"
 	model "collectify/internal/model/db"
 
 	"gorm.io/gorm"

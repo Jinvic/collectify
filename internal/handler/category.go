@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"collectify/internal/dao"
 	"collectify/internal/conn"
+	"collectify/internal/dao"
 	common "collectify/internal/model/common"
 	model "collectify/internal/model/db"
 	define "collectify/internal/model/define"

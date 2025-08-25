@@ -198,7 +198,7 @@ func Disassociate[T1 model.GormModel, T2 model.GormModel](tx *gorm.DB, id1, id2 
 	if err != nil {
 		return err
 	}
-	
+
 	uniqueFields = map[string]interface{}{"id": id2}
 	t2, err := Get[T2](tx, uniqueFields)
 	if err != nil {
