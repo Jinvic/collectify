@@ -254,9 +254,8 @@ func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []ui
 		},
 	}
 
-	
 	filters := []dao.Filter{}
-	
+
 	// 筛选条件
 	if categoryID > 0 {
 		filters = append(filters, dao.Filter{
@@ -303,29 +302,31 @@ func SearchItems(categoryID uint, name string, tagIDs []uint, collectionIDs []ui
 	var items []model.Item
 	var total int64
 	err := db.Transaction(func(tx *gorm.DB) error {
-		// 获取分类信息，并预加载字段
-		fieldMap := make(map[uint]model.Field)
-		category, err := dao.Get[model.Category](tx, map[string]interface{}{"id": categoryID}, "Fields")
-		if err != nil {
-			return err
-		}
-		for _, field := range category.Fields {
-			fieldMap[field.ID] = field
-		}
-
-		// 遍历并添加字段值过滤条件
-		for key, value := range fieldFilters {
-			field, ok := fieldMap[key]
-			if !ok {
-				return fmt.Errorf("field not found: %d", key)
-			}
-
-			builder := dao.NewFieldValueQueryBuilder(tx, field, value)
-			filter, err := builder.Build()
+		if categoryID > 0 {
+			// 获取分类信息，并预加载字段
+			fieldMap := make(map[uint]model.Field)
+			category, err := dao.Get[model.Category](tx, map[string]interface{}{"id": categoryID}, "Fields")
 			if err != nil {
 				return err
 			}
-			filters = append(filters, filter)
+			for _, field := range category.Fields {
+				fieldMap[field.ID] = field
+			}
+
+			// 遍历并添加字段值过滤条件
+			for key, value := range fieldFilters {
+				field, ok := fieldMap[key]
+				if !ok {
+					return fmt.Errorf("field not found: %d", key)
+				}
+
+				builder := dao.NewFieldValueQueryBuilder(tx, field, value)
+				filter, err := builder.Build()
+				if err != nil {
+					return err
+				}
+				filters = append(filters, filter)
+			}
 		}
 
 		// 先查询出所有符合条件的收藏品ID，再预加载关联表，避免笛卡尔积查询
