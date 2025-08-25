@@ -21,8 +21,8 @@ const Navbar = () => {
   const navItems = [
     { label: 'Index', path: '/' },
     { label: 'Categories', path: '/categories' },
-    // { label: 'Tags', path: '/tags' }, // Placeholder
-    // { label: 'Collections', path: '/collections' }, // Placeholder
+    { label: 'Tags', path: '/tags' },
+    { label: 'Collections', path: '/collections' },
     // { label: 'Search', path: '/search' }, // Placeholder
   ];
 
