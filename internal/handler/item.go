@@ -160,3 +160,91 @@ func GetItem(c *gin.Context) {
 
 	SuccessWithData(c, itemDetail)
 }
+
+func AddTag(c *gin.Context) {
+	itemID, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	tagID, err := GetID(c, "tag_id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = dao.Associate[model.Item, model.Tag](conn.GetDB(), itemID, tagID, "Tags")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func RemoveTag(c *gin.Context) {
+	itemID, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	tagID, err := GetID(c, "tag_id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = dao.Disassociate[model.Item, model.Tag](conn.GetDB(), itemID, tagID, "Tags")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func AddToCollection(c *gin.Context) {
+	itemID, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	collectionID, err := GetID(c, "collection_id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = dao.Associate[model.Item, model.Collection](conn.GetDB(), itemID, collectionID, "Collections")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}
+
+func RemoveFromCollection(c *gin.Context) {
+	itemID, err := GetID(c, "id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	collectionID, err := GetID(c, "collection_id")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	err = dao.Disassociate[model.Item, model.Collection](conn.GetDB(), itemID, collectionID, "Collections")
+	if err != nil {
+		Fail(c, err)
+		return
+	}
+
+	Success(c)
+}

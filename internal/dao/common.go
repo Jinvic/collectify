@@ -170,3 +170,45 @@ func Update[T model.GormModel](tx *gorm.DB, uniqueFields map[string]interface{},
 	var t T
 	return tx.Model(&t).Where(uniqueFields).Updates(updateFields).Error
 }
+
+func Associate[T1 model.GormModel, T2 model.GormModel](tx *gorm.DB, id1, id2 uint, association string) error {
+	uniqueFields := map[string]interface{}{"id": id1}
+	t1, err := Get[T1](tx, uniqueFields)
+	if err != nil {
+		return err
+	}
+
+	uniqueFields = map[string]interface{}{"id": id2}
+	t2, err := Get[T2](tx, uniqueFields)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Model(&t1).Association(association).Append(t2)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Disassociate[T1 model.GormModel, T2 model.GormModel](tx *gorm.DB, id1, id2 uint, association string) error {
+	uniqueFields := map[string]interface{}{"id": id1}
+	t1, err := Get[T1](tx, uniqueFields)
+	if err != nil {
+		return err
+	}
+	
+	uniqueFields = map[string]interface{}{"id": id2}
+	t2, err := Get[T2](tx, uniqueFields)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Model(&t1).Association(association).Delete(t2)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

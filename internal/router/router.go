@@ -85,6 +85,12 @@ func initItemRouter(router *gin.RouterGroup) {
 		item.DELETE("/:id", handler.DeleteItem)
 		item.PUT("/:id", handler.UpdateItem)
 		item.POST("/:id/restore", handler.RestoreItem)
+
+		// 关联关系
+		item.POST("/:id/tag/:tag_id", handler.AddTag)
+		item.DELETE("/:id/tag/:tag_id", handler.RemoveTag)
+		item.POST("/:id/collection/:collection_id", handler.AddToCollection)
+		item.DELETE("/:id/collection/:collection_id", handler.RemoveFromCollection)
 	}
 }
 
